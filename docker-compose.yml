@@ -1,0 +1,15 @@
+services:
+  # Aplicação Node.js
+  app:
+    image: arthurvieira2003/medidor-resenha:latest
+    container_name: medidor-resenha
+    network_mode: host
+    environment:
+      - DB_HOST=localhost
+      - DB_PORT=5432
+      - DB_NAME=resenha
+      - DB_USER=admin
+      - DB_PASSWORD=guerreirosdacatolica
+      - PORT=23498
+      - NODE_ENV=production
+    restart: unless-stopped

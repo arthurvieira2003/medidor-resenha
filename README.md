@@ -158,20 +158,44 @@ CREATE INDEX idx_pontuacoes_pontuacao ON pontuacoes(pontuacao DESC);
 
 ## 🐳 Deploy com Docker
 
-### Dockerfile
+### Opção 1: Docker Compose (Recomendado)
+
+Esta opção usa o PostgreSQL já instalado na VPS e é ideal para deploy em servidor:
+
 ```bash
-# Build da imagem
+# Iniciar a aplicação
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Parar aplicação
+docker-compose down
+```
+
+**Pré-requisitos:**
+- PostgreSQL rodando na VPS (localhost:5432)
+- Banco `resenha` criado
+- Usuário com permissões adequadas
+- Arquivo `.env` configurado com as credenciais corretas
+
+**Serviços disponíveis:**
+- Aplicação: http://localhost:23498
+
+### Opção 2: Dockerfile apenas
+
+Para usar apenas o Dockerfile:
+
+```bash
+# Construir a imagem
 docker build -t medidor-resenha .
 
-# Executar container
-docker run -p 23498:23498 --env-file .env medidor-resenha
-
-# Ou com variáveis de ambiente inline
-docker run -p 23498:23498 \
-  -e DB_HOST=seu_host_postgres \
-  -e DB_NAME=medidor_resenha \
-  -e DB_USER=postgres \
-  -e DB_PASSWORD=sua_senha \
+# Executar com arquivo .env
+docker run -d \
+  --name medidor-resenha \
+  -p 23498:23498 \
+  --network host \
+  --env-file .env \
   medidor-resenha
 ```
 

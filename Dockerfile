@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala apenas dependências de produção
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 # Stage 2: Production
 FROM node:18-alpine AS production
@@ -36,10 +36,6 @@ USER medidor
 
 # Expõe a porta configurada no .env (23498)
 EXPOSE 23498
-
-# Configura variáveis de ambiente padrão
-ENV NODE_ENV=production
-ENV PORT=23498
 
 # Comando para iniciar a aplicação
 CMD ["dumb-init", "node", "server.js"]
