@@ -21,8 +21,58 @@ body {
 /* Header Styles */
 .header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 1rem;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
   animation: fadeInDown 1s ease-out;
+}
+
+/* Privacy Notice Styles */
+.privacy-notice {
+  margin: 1.5rem 0;
+  padding: 0;
+}
+
+.privacy-content {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: slideInDown 0.6s ease-out;
+}
+
+.privacy-content i {
+  font-size: 1.5rem;
+  color: #fff;
+  opacity: 0.9;
+}
+
+.privacy-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.privacy-content strong {
+  font-weight: 600;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .title {
@@ -685,6 +735,22 @@ body {
     margin-right: 0;
     margin-bottom: 10px;
   }
+
+  /* Responsive para o aviso de privacidade */
+  .privacy-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .privacy-content i {
+    font-size: 1.2rem;
+  }
+  
+  .privacy-content p {
+    font-size: 0.9rem;
+  }
 }
 
 /* Loading Animation */
@@ -702,4 +768,142 @@ body {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Easter Egg Styles */
+.easter-egg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  color: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  z-index: 10000;
+  animation: easterEggPulse 1s infinite alternate;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes easterEggPulse {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+/* Notificações */
+.notificacao {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 350px;
+  word-wrap: break-word;
+}
+
+.notificacao-success {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.notificacao-warning {
+  background: linear-gradient(135deg, #FF9800, #f57c00);
+}
+
+.notificacao-error {
+  background: linear-gradient(135deg, #F44336, #d32f2f);
+}
+
+.notificacao-info {
+  background: linear-gradient(135deg, #2196F3, #1976d2);
+}
+
+/* Indicador de fonte de dados */
+.source-indicator {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.source-indicator small {
+  color: #666;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.source-indicator i {
+  opacity: 0.7;
+}
+
+/* Animações para notificações */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Melhorias no ranking para dados do banco */
+.ranking-item {
+  transition: all 0.3s ease;
+}
+
+.ranking-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Status de conexão */
+.connection-status {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  z-index: 1000;
+}
+
+.connection-status.online {
+  background: rgba(76, 175, 80, 0.9);
+  color: white;
+}
+
+.connection-status.offline {
+  background: rgba(255, 152, 0, 0.9);
+  color: white;
+}
+
+.connection-status i {
+  margin-right: 5px;
 }

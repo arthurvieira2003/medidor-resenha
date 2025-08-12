@@ -48,6 +48,7 @@ const totalPages = 7;
 // Event Listeners
 document.addEventListener("DOMContentLoaded", function () {
   carregarRanking();
+  verificarConexaoAPI();
 
   // Inicializar paginação
   initializePagination();
@@ -293,10 +294,10 @@ function calcularResenha() {
     nivelClassificacao = 5;
   }
 
-  // Salvar resultado
-  salvarResultado(nome, pontuacaoTotal, nivelClassificacao);
+  // Salvar resultado (enviar pontuação percentual para o banco)
+  salvarResultado(nome, Math.round(pontuacaoPercentual), nivelClassificacao);
 
-  // Mostrar resultado com animação
+  // Mostrar resultado com animação (mostrar pontuação bruta na tela)
   mostrarResultado(nome, pontuacaoTotal, nivelClassificacao);
 }
 
@@ -364,53 +365,118 @@ function animarPontuacao(pontuacaoFinal) {
   }, 500);
 }
 
-// Função para salvar resultado no localStorage
-function salvarResultado(nome, pontuacao, nivel) {
-  let rankings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+// Função para salvar resultado no PostgreSQL
+async function salvarResultado(nome, pontuacao, nivel) {
+  try {
+    // Salvar no banco PostgreSQL
+    const response = await fetch('/api/pontuacao', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nome: nome.trim(),
+        pontuacao: pontuacao
+      })
+    });
 
-  // Verificar se o usuário já existe
-  const indiceExistente = rankings.findIndex(
-    (item) => item.nome.toLowerCase() === nome.toLowerCase()
-  );
+    const result = await response.json();
 
-  const novoResultado = {
-    nome: nome,
-    pontuacao: pontuacao,
-    nivel: nivel,
-    classificacao: classificacoes[nivel].titulo,
-    data: new Date().toISOString(),
-  };
-
-  if (indiceExistente !== -1) {
-    // Atualizar resultado existente
-    rankings[indiceExistente] = novoResultado;
-  } else {
-    // Adicionar novo resultado
-    rankings.push(novoResultado);
+    if (response.ok && result.success) {
+      console.log('✅ Resultado salvo no banco:', result.data);
+      
+      // Atualizar exibição do ranking
+      await carregarRanking();
+      
+      // Mostrar notificação de sucesso
+      mostrarNotificacao('Pontuação salva com sucesso!', 'success');
+    } else {
+      throw new Error(result.error || 'Erro ao salvar pontuação');
+    }
+  } catch (error) {
+    console.error('❌ Erro ao salvar resultado:', error);
+    
+    // Fallback para localStorage em caso de erro (usar pontuação percentual)
+    const pontuacaoMaxima = 137;
+    const pontuacaoPercentual = Math.round((pontuacao / pontuacaoMaxima) * 100);
+    salvarResultadoLocal(nome, pontuacaoPercentual, nivel);
+    mostrarNotificacao('Pontuação salva localmente (sem conexão com servidor)', 'warning');
   }
-
-  // Ordenar por pontuação (maior para menor)
-  rankings.sort((a, b) => b.pontuacao - a.pontuacao);
-
-  // Manter apenas os top 10
-  rankings = rankings.slice(0, 10);
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(rankings));
 }
 
-// Função para carregar e exibir o ranking
-function carregarRanking() {
-  const rankings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  const rankingList = document.getElementById("rankingList");
+// Função de fallback para localStorage
+function salvarResultadoLocal(nome, pontuacao, nivel) {
+  try {
+    let rankings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    
+    const novoResultado = {
+      id: Date.now(),
+      nome: nome.trim(),
+      pontuacao: pontuacao,
+      nivel: nivel,
+      data: new Date().toISOString(),
+    };
+    
+    rankings.push(novoResultado);
+    rankings.sort((a, b) => b.pontuacao - a.pontuacao);
+    rankings = rankings.slice(0, 10);
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(rankings));
+    carregarRankingLocal();
+  } catch (error) {
+    console.error('❌ Erro ao salvar no localStorage:', error);
+  }
+}
+
+// Função para carregar ranking do PostgreSQL
+async function carregarRanking() {
+  try {
+    // Tentar carregar do banco PostgreSQL
+    const response = await fetch('/api/ranking');
+    
+    if (response.ok) {
+      const result = await response.json();
+      
+      if (result.success) {
+        exibirRanking(result.data, 'database');
+        return;
+      }
+    }
+    
+    // Fallback para localStorage
+    console.log('⚠️ Carregando ranking do localStorage (fallback)');
+    carregarRankingLocal();
+    
+  } catch (error) {
+    console.error('❌ Erro ao carregar ranking do servidor:', error);
+    carregarRankingLocal();
+  }
+}
+
+// Função para carregar ranking do localStorage (fallback)
+function carregarRankingLocal() {
+  try {
+    const rankings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    exibirRanking(rankings, 'local');
+  } catch (error) {
+    console.error('❌ Erro ao carregar ranking local:', error);
+  }
+}
+
+// Função para exibir ranking (unificada)
+function exibirRanking(rankings, source) {
+  const rankingList = document.getElementById('rankingList');
+  if (!rankingList) return;
 
   if (rankings.length === 0) {
     rankingList.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <i class="fas fa-trophy" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
-                <p style="font-size: 1.2rem;">Nenhum resultado ainda!</p>
-                <p>Seja o primeiro a fazer o teste!</p>
-            </div>
-        `;
+      <div style="text-align: center; padding: 40px; color: #666;">
+        <i class="fas fa-trophy" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+        <p style="font-size: 1.2rem;">Nenhum resultado ainda!</p>
+        <p>Seja o primeiro a fazer o teste!</p>
+        <small class="source-info">Fonte: ${source === 'database' ? 'Banco de dados' : 'Armazenamento local'}</small>
+      </div>
+    `;
     return;
   }
 
@@ -432,26 +498,100 @@ function carregarRanking() {
       iconeposicao = '<i class="fas fa-award"></i>';
     }
 
+    // Determinar nível baseado na pontuação
+    const nivel = determinarNivel(item.pontuacao);
+    
     const rankingItem = document.createElement("div");
     rankingItem.className = "ranking-item";
     rankingItem.style.animationDelay = `${index * 0.1}s`;
 
     rankingItem.innerHTML = `
-            <div class="ranking-position ${classeposicao}">
-                ${iconeposicao}
-                ${posicao}º
-            </div>
-            <div class="ranking-info">
-                <div class="ranking-name">${item.nome}</div>
-                <div class="ranking-classification">${item.classificacao}</div>
-            </div>
-            <div class="ranking-score">${Math.round(
-              (item.pontuacao / 137) * 100
-            )}/100</div>
-        `;
+      <div class="ranking-position ${classeposicao}">
+        ${iconeposicao}
+        ${posicao}º
+      </div>
+      <div class="ranking-info">
+        <div class="ranking-name">${item.nome}</div>
+        <div class="ranking-classification">${classificacoes[nivel]?.titulo || 'Nível ' + nivel}</div>
+      </div>
+      <div class="ranking-score">${item.pontuacao}/100</div>
+    `;
 
     rankingList.appendChild(rankingItem);
   });
+
+  // Adicionar indicador da fonte dos dados
+  const sourceIndicator = document.createElement('div');
+  sourceIndicator.className = 'source-indicator';
+  sourceIndicator.innerHTML = `
+    <small style="text-align: center; display: block; margin-top: 20px; color: #666;">
+      <i class="fas fa-${source === 'database' ? 'database' : 'save'}"></i>
+      ${source === 'database' ? 'Dados do servidor' : 'Dados locais'}
+    </small>
+  `;
+  rankingList.appendChild(sourceIndicator);
+}
+
+// Função auxiliar para determinar nível baseado na pontuação
+function determinarNivel(pontuacao) {
+  // Pontuação já vem como percentual (0-100)
+  if (pontuacao <= 33.6) return 1;
+  if (pontuacao <= 50.4) return 2;
+  if (pontuacao <= 67.2) return 3;
+  if (pontuacao <= 83.9) return 4;
+  return 5;
+}
+
+// Função para verificar conexão com API
+async function verificarConexaoAPI() {
+  try {
+    const response = await fetch('/api/health');
+    if (response.ok) {
+      console.log('✅ Conexão com API estabelecida');
+    }
+  } catch (error) {
+    console.log('⚠️ API não disponível, usando armazenamento local');
+  }
+}
+
+// Função para mostrar notificações
+function mostrarNotificacao(mensagem, tipo = 'info') {
+  // Criar elemento de notificação
+  const notificacao = document.createElement('div');
+  notificacao.className = `notificacao notificacao-${tipo}`;
+  notificacao.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+  `;
+  
+  // Definir cor baseada no tipo
+  const cores = {
+    success: '#4CAF50',
+    warning: '#FF9800',
+    error: '#F44336',
+    info: '#2196F3'
+  };
+  
+  notificacao.style.backgroundColor = cores[tipo] || cores.info;
+  notificacao.textContent = mensagem;
+  
+  document.body.appendChild(notificacao);
+  
+  // Remover após 3 segundos
+  setTimeout(() => {
+    notificacao.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => {
+      if (notificacao.parentNode) {
+        notificacao.parentNode.removeChild(notificacao);
+      }
+    }, 300);
+  }, 3000);
 }
 
 // Função para resetar o formulário

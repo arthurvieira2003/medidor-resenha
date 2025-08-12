@@ -1,25 +1,45 @@
-# Use uma imagem nginx leve para servir arquivos estáticos
-FROM nginx:alpine
+# Multi-stage build para otimização
+# Stage 1: Build dependencies
+FROM node:18-alpine AS dependencies
 
-# Remove a configuração padrão do nginx
-RUN rm /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Copia os arquivos do projeto para o diretório de arquivos estáticos do nginx
-COPY . /usr/share/nginx/html/
+# Copia package.json e package-lock.json
+COPY package*.json ./
 
-# Cria uma configuração personalizada do nginx
-RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
-    echo '    listen 23498;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    server_name localhost;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '}' >> /etc/nginx/conf.d/default.conf
+# Instala apenas dependências de produção
+RUN npm ci --only=production && npm cache clean --force
 
-# Expõe a porta 23498
+# Stage 2: Production
+FROM node:18-alpine AS production
+
+# Instala dumb-init para gerenciamento de processos
+RUN apk add --no-cache dumb-init
+
+# Cria usuário não-root para segurança
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S medidor -u 1001
+
+WORKDIR /app
+
+# Copia dependências do stage anterior
+COPY --from=dependencies --chown=medidor:nodejs /app/node_modules ./node_modules
+
+# Copia arquivos da aplicação
+COPY --chown=medidor:nodejs . .
+
+# Remove arquivos desnecessários
+RUN rm -rf .git .gitignore README.md Dockerfile .dockerignore
+
+# Muda para usuário não-root
+USER medidor
+
+# Expõe a porta configurada no .env (23498)
 EXPOSE 23498
 
-# Comando para iniciar o nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Configura variáveis de ambiente padrão
+ENV NODE_ENV=production
+ENV PORT=23498
+
+# Comando para iniciar a aplicação
+CMD ["dumb-init", "node", "server.js"]
