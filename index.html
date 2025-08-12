@@ -1,577 +1,1158 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Medidor de Resenha 📊</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
     <div class="container">
-        <header class="header">
-            <h1 class="title">
-                <i class="fas fa-chart-line"></i>
-                Medidor de Resenha
-            </h1>
-            <p class="subtitle">Descubra quem é o mais resenhudo da equipe! 🎯</p>
-        </header>
+      <header class="header">
+        <h1 class="title">
+          <i class="fas fa-chart-line"></i>
+          Medidor de Resenha
+        </h1>
+        <p class="subtitle">Descubra quem é o mais resenhudo da equipe!</p>
+      </header>
 
-        <main class="main-content">
-            <div class="form-container" id="formContainer">
-                <div class="form-header">
-                    <h2>🎯 Medidor de Resenha</h2>
-                    <p>Descubra se você é o DJ da alegria no trabalho!</p>
-                    <div class="manual-quote">
-                        <em>"Se a vida é uma festa, você é o DJ da alegria."</em>
-                    </div>
-                </div>
+      <main class="main-content">
+        <div class="form-container" id="formContainer">
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+              <span id="currentPage">1</span> de <span id="totalPages">7</span>
+            </div>
+          </div>
 
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div class="progress-text">
-                        <span id="currentPage">1</span> de <span id="totalPages">5</span>
-                    </div>
-                </div>
-
-                <form id="resenhaForm" class="resenha-form">
-                    <div class="input-group">
-                        <label for="nome">
-                            <i class="fas fa-user"></i>
-                            Seu Nome
-                        </label>
-                        <input type="text" id="nome" name="nome" required placeholder="Digite seu nome">
-                    </div>
-
-                    <div class="questions-container">
-                        <!-- Página 1: Chegada e Presença -->
-                        <div class="page" id="page1">
-                            <div class="page-header">
-                                <h2>🚀 Chegada e Presença</h2>
-                                <p><em>"Chegar chegando – Se o ambiente tá morto, você é o raio que cai no meio da festa!"</em></p>
-                            </div>
-
-                            <div class="question-group">
-                                <label>
-                                    <i class="fas fa-clock"></i>
-                                    Quanto tempo você gasta conversando com colegas durante o expediente?
-                                </label>
-                                <div class="radio-group">
-                                    <label class="radio-option">
-                                        <input type="radio" name="tempo_conversa" value="1">
-                                        <span>Menos de 30 minutos - Focado no trampo</span>
-                                    </label>
-                                    <label class="radio-option">
-                                        <input type="radio" name="tempo_conversa" value="2">
-                                        <span>30 min a 1h - Equilibrando a parada</span>
-                                    </label>
-                                    <label class="radio-option">
-                                        <input type="radio" name="tempo_conversa" value="3">
-                                        <span>1 a 2h - Já tô entrando no clima</span>
-                                    </label>
-                                    <label class="radio-option">
-                                        <input type="radio" name="tempo_conversa" value="4">
-                                        <span>Mais de 2h - Sou o combustível da roda! 🔥</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                    <div class="question-group">
-                        <h3>🗣️ Com que frequência você inicia conversas com colegas?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="inicia_conversa" value="1">
-                                <span>Raramente - Sou mais na minha</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="inicia_conversa" value="2">
-                                <span>Às vezes - Quando rola o clima</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="inicia_conversa" value="3">
-                                <span>Frequentemente - Gosto de puxar papo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="inicia_conversa" value="4">
-                                <span>Sempre! "E AÍ, MEUS CRIAS?!" 🎤</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>☕ Quantas pausas para café/água você faz por dia?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="pausas_cafe" value="1">
-                                <span>1-2 pausas - Só o necessário</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="pausas_cafe" value="2">
-                                <span>3-4 pausas - Preciso dar uma respirada</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="pausas_cafe" value="3">
-                                <span>5-6 pausas - Café é vida!</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="pausas_cafe" value="4">
-                                <span>Perdi as contas - Vivo na copa! ☕</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>😂 Quantas piadas/histórias engraçadas você conta por dia?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="conta_piadas" value="1">
-                                <span>Nenhuma - Não sou de contar piada</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="conta_piadas" value="2">
-                                <span>1-2 - Quando surge a oportunidade</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="conta_piadas" value="3">
-                                <span>3-5 - Sempre tenho uma história boa</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="conta_piadas" value="4">
-                                <span>Mais de 5 - Sou o contador oficial! 🎭</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Página 2: Conexões e Redes Sociais -->
-                <div class="page" id="page2" style="display: none;">
-                    <div class="page-header">
-                        <h2>📱 Conexões e Redes Sociais</h2>
-                        <p><em>"Memes na ponta da língua – Atualize seu repertório como quem atualiza o Instagram."</em></p>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>📱 Com que frequência você usa redes sociais durante o trabalho?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="redes_sociais" value="1">
-                                <span>Nunca - Foco total no trampo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="redes_sociais" value="2">
-                                <span>Raramente - Só uma olhadinha</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="redes_sociais" value="3">
-                                <span>Algumas vezes - Preciso me atualizar</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="redes_sociais" value="4">
-                                <span>Frequentemente - Sou o feed ambulante! 📲</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🗣️ Você participa de fofocas ou conversas sobre a vida dos outros?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="fofocas" value="1">
-                                <span>Nunca - Não é minha praia</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="fofocas" value="2">
-                                <span>Raramente - Só escuto</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="fofocas" value="3">
-                                <span>Às vezes - Quando é interessante</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="fofocas" value="4">
-                                <span>Sempre - Sou o jornal da empresa! 📰</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>📰 Você compartilha notícias, memes ou curiosidades com os colegas?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="compartilha_conteudo" value="1">
-                                <span>Nunca - Cada um na sua</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="compartilha_conteudo" value="2">
-                                <span>Raramente - Só quando é muito bom</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="compartilha_conteudo" value="3">
-                                <span>Frequentemente - Gosto de informar</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="compartilha_conteudo" value="4">
-                                <span>Sempre - Sou o portal de notícias! 🌐</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Página 3: Ambiente e Socialização -->
-                <div class="page" id="page3" style="display: none;">
-                    <div class="page-header">
-                        <h2>🎉 Ambiente e Socialização</h2>
-                        <p><em>"Topar tudo – Chamar? Vai. Nem que seja pra tomar um café às 3h da manhã."</em></p>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🎂 Você organiza ou participa de comemorações no trabalho?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="comemoracoes" value="1">
-                                <span>Raramente participo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comemoracoes" value="2">
-                                <span>Participo quando convidado</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comemoracoes" value="3">
-                                <span>Sempre participo e animo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comemoracoes" value="4">
-                                <span>Sou o organizador oficial</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🍽️ Como você se comporta na hora do almoço?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="comportamento_almoco" value="1">
-                                <span>Como sozinho/rapidamente - Foco no trampo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comportamento_almoco" value="2">
-                                <span>Como com alguns colegas - Boa companhia</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comportamento_almoco" value="3">
-                                <span>Mesa sempre cheia - Sou o ímã da galera</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comportamento_almoco" value="4">
-                                <span>Organizo saídas em grupo - "Bora almoçar!" 🍕</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🎪 Você propõe atividades de descontração no trabalho?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="atividades_descontracao" value="1">
-                                <span>Nunca - Trabalho é trabalho</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="atividades_descontracao" value="2">
-                                <span>Raramente - Só quando alguém sugere</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="atividades_descontracao" value="3">
-                                <span>Às vezes - Quando o clima tá pesado</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="atividades_descontracao" value="4">
-                                <span>Sempre - Sou o animador oficial! 🎉</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🎵 Você coloca música ou cria ambiente descontraído?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="musica_ambiente" value="1">
-                                <span>Nunca - Prefiro silêncio</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="musica_ambiente" value="2">
-                                <span>Raramente - Só em ocasiões especiais</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="musica_ambiente" value="3">
-                                <span>Frequentemente - Música anima o ambiente</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="musica_ambiente" value="4">
-                                <span>Sempre - Sou o DJ da alegria! 🎧</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🚶 Quantas vezes você sai da sua mesa durante o dia?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="sair_mesa" value="1">
-                                <span>Poucas vezes - Só o necessário</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="sair_mesa" value="2">
-                                <span>Algumas vezes - Preciso me movimentar</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="sair_mesa" value="3">
-                                <span>Muitas vezes - Gosto de circular</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="sair_mesa" value="4">
-                                <span>Constantemente - Sou nômade digital! 🏃</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Página 4: Cuidado e Conexões -->
-                <div class="page" id="page4" style="display: none;">
-                    <div class="page-header">
-                        <h2>❤️ Cuidado e Conexões</h2>
-                        <p><em>"Juntar mundos – Apresente pessoas, conecte histórias, faça o rolê crescer."</em></p>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🤗 Você se preocupa com o bem-estar dos colegas?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="bem_estar_colegas" value="1">
-                                <span>Raramente - Cada um na sua</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="bem_estar_colegas" value="2">
-                                <span>Às vezes - Quando percebo algo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="bem_estar_colegas" value="3">
-                                <span>Frequentemente - Gosto de ajudar</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="bem_estar_colegas" value="4">
-                                <span>Sempre - Sou o psicólogo da turma! 🧠</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🎂 Você lembra e comemora datas especiais dos colegas?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="datas_especiais" value="1">
-                                <span>Não costumo lembrar - Memória fraca</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="datas_especiais" value="2">
-                                <span>Lembro de alguns - Os mais próximos</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="datas_especiais" value="3">
-                                <span>Sempre parabenizo - Gosto de celebrar</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="datas_especiais" value="4">
-                                <span>Sou a agenda humana - Nunca esqueço! 📅</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🎤 Como você se comporta em reuniões?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="comportamento_reunioes" value="1">
-                                <span>Silencioso e focado - Só escuto</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comportamento_reunioes" value="2">
-                                <span>Participo quando necessário - Pontual</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comportamento_reunioes" value="3">
-                                <span>Faço comentários e piadas - Quebro o gelo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="comportamento_reunioes" value="4">
-                                <span>Sou o entertainer oficial - Animo a galera! 🎭</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Página 5: Esportes e Paixões -->
-                <div class="page" id="page5" style="display: none;">
-                    <div class="page-header">
-                        <h2>⚽ Esportes e Paixões</h2>
-                        <p><em>"Puxar assuntos aleatórios – 'Vocês sabiam que existe campeonato mundial de arremesso de celular?'"</em></p>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>⚽ Para qual time você torce?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="time_coracao" value="1">
-                                <span>Não gosto de futebol - Não é minha praia</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="time_coracao" value="2">
-                                <span>Assisto só Copa do Mundo - Patriota ocasional</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="time_coracao" value="3">
-                                <span>Tenho time, mas não sou fanático - Torço com moderação</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="time_coracao" value="4">
-                                <span>Sou apaixonado pelo meu time - Vivo e respiro futebol! ⚽</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>🇧🇷 Na Copa do Mundo você torce pro Brasil?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="torce_brasil" value="1">
-                                <span>Não assisto Copa do Mundo - Não me interessa</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="torce_brasil" value="2">
-                                <span>Assisto, mas sem muito interesse - Só por curiosidade</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="torce_brasil" value="3">
-                                <span>Torço pro Brasil com moderação - Patriota equilibrado</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="torce_brasil" value="4">
-                                <span>Sou patriota raiz - Brasil acima de tudo! 🇧🇷</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>📺 Você vê os gols do Brasileirão, Copa do Brasil, Libertadores no dia seguinte?</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="ve_gols" value="1">
-                                <span>Nunca vejo - Não me interessa</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="ve_gols" value="2">
-                                <span>Às vezes, se alguém mostrar - Passivo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="ve_gols" value="3">
-                                <span>Sempre vejo os melhores momentos - Atualizado</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="ve_gols" value="4">
-                                <span>Sou viciado em highlights esportivos! 📱</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="question-group">
-                        <h3>📻 Você escuta programas esportivos no rádio? (Papo Esportivo)</h3>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="radio_esportivo" value="1">
-                                <span>Nunca escuto - Não é meu estilo</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="radio_esportivo" value="2">
-                                <span>Raramente, só se estiver passando - Ocasional</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="radio_esportivo" value="3">
-                                <span>Escuto frequentemente - Gosto de debate</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="radio_esportivo" value="4">
-                                <span>Sou fã de programas esportivos - Viciado em resenha! 🎙️</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-
-                    </div>
-
-                    <div class="navigation-buttons">
-                        <button type="button" class="nav-btn prev" id="prevBtn" onclick="previousPage()" disabled>
-                            ← Anterior
-                        </button>
-                        <button type="button" class="nav-btn next" id="nextBtn" onclick="nextPage()">
-                            Próxima →
-                        </button>
-                        <button type="submit" class="submit-btn" id="submitBtn" style="display: none;">
-                            <span>🎯 Descobrir Meu Nível</span>
-                        </button>
-                    </div>
-                </form>
+          <form id="resenhaForm" class="resenha-form">
+            <div class="input-group">
+              <label for="nome">
+                <i class="fas fa-user"></i>
+                Seu Nome
+              </label>
+              <input
+                type="text"
+                id="nome"
+                name="nome"
+                required
+                placeholder="Digite seu nome"
+              />
             </div>
 
-            <div class="result-container" id="resultContainer" style="display: none;">
-                <div class="result-header">
-                    <h2>Seu Resultado</h2>
+            <div class="questions-container">
+              <!-- Página 1: Chegada e Presença -->
+              <div class="page" id="page1">
+                <div class="page-header">
+                  <h2>🚀 Chegada e Presença</h2>
+                  <p>
+                    <em
+                      >"Chegar chegando – Se o ambiente tá morto, você é o raio
+                      que cai no meio da festa!"</em
+                    >
+                  </p>
                 </div>
-                <div class="result-content">
-                    <div class="score-display">
-                        <div class="score-circle">
-                            <span class="score-number" id="scoreNumber">0</span>
-                            <span class="score-total">/76</span>
-                        </div>
-                        <div class="score-bar">
-                            <div class="score-fill" id="scoreFill"></div>
-                        </div>
-                    </div>
-                    <div class="classification">
-                        <h3 id="classificationTitle">Sua Classificação</h3>
-                        <div class="classification-badge" id="classificationBadge">
-                            <i class="classification-icon" id="classificationIcon"></i>
-                            <span id="classificationText"></span>
-                        </div>
-                        <p class="classification-description" id="classificationDescription"></p>
-                    </div>
+
+                <div class="question-group">
+                  <label>
+                    <i class="fas fa-clock"></i>
+                    Quanto tempo você gasta conversando com colegas durante o
+                    expediente?
+                  </label>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="tempo_conversa" value="1" />
+                      <span>Menos de 30 minutos - Focado no trampo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="tempo_conversa" value="2" />
+                      <span>30 min a 1h - Equilibrando a parada</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="tempo_conversa" value="3" />
+                      <span>1 a 2h - Já tô entrando no clima</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="tempo_conversa" value="4" />
+                      <span>Mais de 2h - Sou o combustível da roda! 🔥</span>
+                    </label>
+                  </div>
                 </div>
-                <div class="result-actions">
-                    <button class="btn-secondary" onclick="resetForm()">
-                        <i class="fas fa-redo"></i>
-                        Fazer Novo Teste
-                    </button>
-                    <button class="btn-primary" onclick="shareResult()">
-                        <i class="fas fa-share"></i>
-                        Compartilhar Resultado
-                    </button>
+
+                <div class="question-group">
+                  <h3>
+                    🗣️ Com que frequência você inicia conversas com colegas?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="inicia_conversa" value="1" />
+                      <span>Raramente - Sou mais na minha</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="inicia_conversa" value="2" />
+                      <span>Às vezes - Quando rola o clima</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="inicia_conversa" value="3" />
+                      <span>Frequentemente - Gosto de puxar papo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="inicia_conversa" value="4" />
+                      <span>Sempre! "E AÍ, MEUS CRIAS?!" 🎤</span>
+                    </label>
+                  </div>
                 </div>
+
+                <div class="question-group">
+                  <h3>
+                    ☕ Quantas pausas para café/banheiro você faz por dia?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="pausas_cafe" value="1" />
+                      <span>1-2 pausas - Só o necessário</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="pausas_cafe" value="2" />
+                      <span>3-4 pausas - Preciso dar uma respirada</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="pausas_cafe" value="3" />
+                      <span>5-6 pausas - Café é vida!</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="pausas_cafe" value="4" />
+                      <span>Perdi as contas - Vivo na copa! ☕</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    😂 Quantas piadas/histórias engraçadas você conta por dia?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="piadas_historias" value="1" />
+                      <span>Nenhuma - Não sou de contar piada</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="piadas_historias" value="2" />
+                      <span>1-2 - Quando surge a oportunidade</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="piadas_historias" value="3" />
+                      <span>3-5 - Sempre tenho uma história boa</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="piadas_historias" value="4" />
+                      <span>Mais de 5 - Sou o contador oficial! 🎭</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Página 2: Conexões e Redes Sociais -->
+              <div class="page" id="page2" style="display: none">
+                <div class="page-header">
+                  <h2>📱 Conexões e Redes Sociais</h2>
+                  <p>
+                    <em
+                      >"Memes na ponta da língua – Atualize seu repertório como
+                      quem atualiza o Instagram."</em
+                    >
+                  </p>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    📱 Com que frequência você usa redes sociais durante o
+                    trabalho?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="redes_sociais" value="1" />
+                      <span>Nunca - Foco total no trampo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="redes_sociais" value="2" />
+                      <span>Raramente - Só uma olhadinha</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="redes_sociais" value="3" />
+                      <span>Algumas vezes - Preciso me atualizar</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="redes_sociais" value="4" />
+                      <span>Frequentemente - Sou o feed ambulante! 📲</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    🗣️ Você participa de fofocas ou conversas sobre a vida dos
+                    outros?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="fofocas" value="1" />
+                      <span>Nunca - Não é minha praia</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="fofocas" value="2" />
+                      <span>Raramente - Só escuto</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="fofocas" value="3" />
+                      <span>Às vezes - Quando é interessante</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="fofocas" value="4" />
+                      <span>Sempre - Sou o jornal da empresa! 📰</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    📰 Você compartilha notícias, memes ou curiosidades com os
+                    colegas?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="compartilha_conteudo"
+                        value="1"
+                      />
+                      <span>Nunca - Cada um na sua</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="compartilha_conteudo"
+                        value="2"
+                      />
+                      <span>Raramente - Só quando é muito bom</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="compartilha_conteudo"
+                        value="3"
+                      />
+                      <span>Frequentemente - Gosto de informar</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="compartilha_conteudo"
+                        value="4"
+                      />
+                      <span>Sempre - Sou o portal de notícias! 🌐</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Página 3: Ambiente e Socialização -->
+              <div class="page" id="page3" style="display: none">
+                <div class="page-header">
+                  <h2>🎉 Ambiente e Socialização</h2>
+                  <p>
+                    <em
+                      >"Topar tudo – Chamar? Vai. Nem que seja pra tomar um café
+                      às 3h da manhã."</em
+                    >
+                  </p>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    🎂 Você organiza ou participa de comemorações no trabalho?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="comemoracoes" value="1" />
+                      <span>Raramente participo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="comemoracoes" value="2" />
+                      <span>Participo quando convidado</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="comemoracoes" value="3" />
+                      <span>Sempre participo e animo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="comemoracoes" value="4" />
+                      <span>Sou o organizador oficial</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🍽️ Como você se comporta na hora do almoço?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="comportamento_almoco"
+                        value="1"
+                      />
+                      <span>Como sozinho/rapidamente - Foco no trampo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="comportamento_almoco"
+                        value="2"
+                      />
+                      <span>Como com alguns colegas - Boa companhia</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="comportamento_almoco"
+                        value="3"
+                      />
+                      <span>Mesa sempre cheia - Sou o ímã da galera</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="comportamento_almoco"
+                        value="4"
+                      />
+                      <span>Organizo saídas em grupo - "Bora almoçar!" 🍕</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    🎪 Você propõe atividades de descontração no trabalho?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="atividades_descontracao"
+                        value="1"
+                      />
+                      <span>Nunca - Trabalho é trabalho</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="atividades_descontracao"
+                        value="2"
+                      />
+                      <span>Raramente - Só quando alguém sugere</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="atividades_descontracao"
+                        value="3"
+                      />
+                      <span>Às vezes - Quando o clima tá pesado</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="atividades_descontracao"
+                        value="4"
+                      />
+                      <span>Sempre - Sou o animador oficial! 🎉</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🎵 Você coloca música ou cria ambiente descontraído?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="musica_ambiente" value="1" />
+                      <span>Nunca - Prefiro silêncio</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="musica_ambiente" value="2" />
+                      <span>Raramente - Só em ocasiões especiais</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="musica_ambiente" value="3" />
+                      <span>Frequentemente - Música anima o ambiente</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="musica_ambiente" value="4" />
+                      <span>Sempre - Sou o DJ da alegria! 🎧</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🚶 Quantas vezes você sai da sua mesa durante o dia?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="sair_mesa" value="1" />
+                      <span>Poucas vezes - Só o necessário</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="sair_mesa" value="2" />
+                      <span>Algumas vezes - Preciso me movimentar</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="sair_mesa" value="3" />
+                      <span>Muitas vezes - Gosto de circular</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="sair_mesa" value="4" />
+                      <span>Constantemente - Sou nômade digital! 🏃</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Página 4: Zoação e Amizade -->
+              <div class="page" id="page4" style="display: none">
+                <div class="page-header">
+                  <h2>😈 Zoação e Amizade</h2>
+                  <p>
+                    <em
+                      >"Amigo de verdade é aquele que te zoa na frente de todos,
+                      mas te defende quando você não tá."</em
+                    >
+                  </p>
+                </div>
+
+                <div class="question-group">
+                  <h3>😈 Como você trata os amigos no trabalho?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="bem_estar_colegas" value="4" />
+                      <span>Zôo sem dó - Mas se precisar, tô junto! 💪</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bem_estar_colegas" value="3" />
+                      <span>Regresso na medida - Amizade verdadeira</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bem_estar_colegas" value="2" />
+                      <span>Às vezes provoco - Mas com carinho</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bem_estar_colegas" value="1" />
+                      <span>Sou muito certinho - Falta malícia</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🎂 Como você lida com aniversários dos colegas?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="datas_especiais" value="4" />
+                      <span>Lembro só pra zoar - "Tá ficando velho!" 😈</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="datas_especiais" value="3" />
+                      <span>Parabenizo e já emendo uma piada</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="datas_especiais" value="2" />
+                      <span>Lembro dos chegados - Mas sem frescura</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="datas_especiais" value="1" />
+                      <span>Não lembro - Sou ruim de data mesmo</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🎤 Como você se comporta em reuniões?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="comportamento_reunioes"
+                        value="1"
+                      />
+                      <span>Silencioso e focado - Só escuto</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="comportamento_reunioes"
+                        value="2"
+                      />
+                      <span>Participo quando necessário - Pontual</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="comportamento_reunioes"
+                        value="3"
+                      />
+                      <span>Faço comentários e piadas - Quebro o gelo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="comportamento_reunioes"
+                        value="4"
+                      />
+                      <span
+                        >Sou o entertainer oficial - Animo a galera! 🎭</span
+                      >
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    🎯 Você faz trocadilhos e bullying saudável com os colegas?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="trocadilhos_bullying"
+                        value="4"
+                      />
+                      <span
+                        >Sempre! Tenho trocadilho na ponta da língua 🎪</span
+                      >
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="trocadilhos_bullying"
+                        value="3"
+                      />
+                      <span>Frequentemente - Adoro uma zoação criativa</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="trocadilhos_bullying"
+                        value="2"
+                      />
+                      <span>Às vezes - Quando surge a inspiração</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="trocadilhos_bullying"
+                        value="1"
+                      />
+                      <span>Raramente - Não sou criativo com palavras</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Página 5: Esportes e Paixões -->
+              <div class="page" id="page5" style="display: none">
+                <div class="page-header">
+                  <h2>⚽ Esportes e Paixões</h2>
+                  <p>
+                    <em
+                      >"Puxar assuntos aleatórios – 'Vocês sabiam que existe
+                      campeonato mundial de arremesso de celular?'"</em
+                    >
+                  </p>
+                </div>
+
+                <div class="question-group">
+                  <h3>⚽ Para qual time você torce?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="time_coracao" value="1" />
+                      <span>Não gosto de futebol - Não é minha praia</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="time_coracao" value="2" />
+                      <span>Assisto só Copa do Mundo - Patriota ocasional</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="time_coracao" value="3" />
+                      <span
+                        >Tenho time, mas não sou fanático - Torço com
+                        moderação</span
+                      >
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="time_coracao" value="4" />
+                      <span
+                        >Sou apaixonado pelo meu time - Vivo e respiro futebol!
+                        ⚽</span
+                      >
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🇧🇷 Na Copa do Mundo você torce pro Brasil?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="torce_brasil" value="1" />
+                      <span>Não assisto Copa do Mundo - Não me interessa</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="torce_brasil" value="2" />
+                      <span
+                        >Assisto, mas sem muito interesse - Só por
+                        curiosidade</span
+                      >
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="torce_brasil" value="3" />
+                      <span
+                        >Torço pro Brasil com moderação - Patriota
+                        equilibrado</span
+                      >
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="torce_brasil" value="4" />
+                      <span>Sou patriota raiz - Brasil acima de tudo! 🇧🇷</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    📺 Você vê os gols do Brasileirão, Copa do Brasil,
+                    Libertadores no dia seguinte?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="ve_gols" value="1" />
+                      <span>Nunca vejo - Não me interessa</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="ve_gols" value="2" />
+                      <span>Às vezes, se alguém mostrar - Passivo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="ve_gols" value="3" />
+                      <span>Sempre vejo os melhores momentos - Atualizado</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="ve_gols" value="4" />
+                      <span>Sou viciado em highlights esportivos! 📱</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    📻 Você escuta programas esportivos no rádio? (Papo
+                    Esportivo)
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="radio_esportivo" value="1" />
+                      <span>Nunca escuto - Não é meu estilo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="radio_esportivo" value="2" />
+                      <span>Raramente, só se estiver passando - Ocasional</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="radio_esportivo" value="3" />
+                      <span>Escuto frequentemente - Gosto de debate</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="radio_esportivo" value="4" />
+                      <span
+                        >Sou fã de programas esportivos - Viciado em resenha!
+                        🎙️</span
+                      >
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>⚽ Você puxa assunto de futebol no trabalho?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="futebol_trabalho" value="1" />
+                      <span>Nunca falo de futebol - Não é meu assunto</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="futebol_trabalho" value="2" />
+                      <span>Só quando alguém puxa o assunto - Passivo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="futebol_trabalho" value="3" />
+                      <span>Frequentemente comento sobre jogos - Ativo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="futebol_trabalho" value="4" />
+                      <span
+                        >Sempre puxo papo de futebol - Sou o comentarista
+                        oficial! ⚽</span
+                      >
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🏆 Você acompanha as transferências e contratações?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="transferencias" value="1" />
+                      <span>Não acompanho - Não me interessa</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="transferencias" value="2" />
+                      <span>Só as mais famosas - Ocasional</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="transferencias" value="3" />
+                      <span>Acompanho do meu time e rivais - Focado</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="transferencias" value="4" />
+                      <span
+                        >Sou viciado em mercado da bola - Sei de tudo! 📰</span
+                      >
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>👨‍💼 Você conhece técnicos e jogadores por nome?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="conhece_jogadores" value="1" />
+                      <span>Conheço poucos - Só os mais famosos</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="conhece_jogadores" value="2" />
+                      <span>Conheço os principais - Básico</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="conhece_jogadores" value="3" />
+                      <span
+                        >Conheço muitos jogadores e técnicos - Bem
+                        informado</span
+                      >
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="conhece_jogadores" value="4" />
+                      <span
+                        >Sou uma enciclopédia do futebol - Conheço até reserva!
+                        🧠</span
+                      >
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Página 6: Vida Noturna e Atitude Raiz -->
+              <div class="page" id="page6" style="display: none">
+                <div class="page-header">
+                  <h2>🍻 Vida Noturna e Atitude Raiz</h2>
+                  <p>
+                    <em
+                      >"Resenhudo raiz não tem limite - da zona ao trabalho,
+                      sempre no pique!"
+                    </em>
+                  </p>
+                </div>
+
+                <div class="question-group">
+                  <h3>🌃 Você já foi pra zona?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="foi_zona" value="1" />
+                      <span>Nunca fui - Não é meu estilo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="foi_zona" value="2" />
+                      <span>Já fui algumas vezes - Experiência básica</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="foi_zona" value="3" />
+                      <span>Frequento regularmente - Conheço o esquema</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="foi_zona" value="4" />
+                      <span
+                        >Sou veterano da zona - Tenho carteirinha VIP! 🎭</span
+                      >
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🗣️ Qual seu nível de repertório de cortes?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="repertorio_cortes" value="1" />
+                      <span>Básico - Só os clássicos</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="repertorio_cortes" value="2" />
+                      <span>Intermediário - Tenho algumas na manga</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="repertorio_cortes" value="3" />
+                      <span>Avançado - Sempre tenho uma resposta na ponta</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="repertorio_cortes" value="4" />
+                      <span
+                        >Master Level - Sou uma metralhadora de cortes! 🔥</span
+                      >
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>💪 Você deixa os outros respirar na zoação?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="deixa_respirar" value="1" />
+                      <span>Sempre dou uma pausa - Tenho dó</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="deixa_respirar" value="2" />
+                      <span>Às vezes paro - Depende da situação</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="deixa_respirar" value="3" />
+                      <span>Raramente paro - Vou até o final</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="deixa_respirar" value="4" />
+                      <span>Nunca paro - Não sei o que é dó! 😈</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🍺 Qual seu limite de cerveja?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="limite_cerveja" value="1" />
+                      <span>1-2 cervejas - Moderado</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="limite_cerveja" value="2" />
+                      <span>3-5 cervejas - Médio</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="limite_cerveja" value="3" />
+                      <span>6-10 cervejas - Resistente</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="limite_cerveja" value="4" />
+                      <span>Sem limite - Sou um tanque de guerra! 🍻</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>
+                    🥃 Você bebe cachaça, álcool de posto, água de bateria?
+                  </h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="bebidas_hardcore" value="1" />
+                      <span>Nunca - Só bebidas normais</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bebidas_hardcore" value="2" />
+                      <span>Raramente - Só em situações extremas</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bebidas_hardcore" value="3" />
+                      <span>Frequentemente - Não tenho frescura</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bebidas_hardcore" value="4" />
+                      <span>Sempre - Quanto mais forte, melhor! 💀</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Página 7: Desilusão Amorosa e Experiências -->
+              <div class="page" id="page7" style="display: none">
+                <div class="page-header">
+                  <h2>💔 Desilusão Amorosa e Experiências</h2>
+                  <p>
+                    <em
+                      >"Todo resenhudo raiz já passou por pelo menos uma
+                      desilusão - é combustível pra resenha!"
+                    </em>
+                  </p>
+                </div>
+
+                <div class="question-group">
+                  <h3>💔 Quantas desilusões amorosas você já teve?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="desilusoes_amorosas"
+                        value="1"
+                      />
+                      <span>Nenhuma - Ainda não passei por isso</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="desilusoes_amorosas"
+                        value="2"
+                      />
+                      <span>1-2 desilusões - Experiência básica</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="desilusoes_amorosas"
+                        value="3"
+                      />
+                      <span>3-5 desilusões - Já tenho bagagem</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="desilusoes_amorosas"
+                        value="4"
+                      />
+                      <span>Mais de 5 - Sou PhD em coração partido! 💔</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>😢 Você fala sobre suas desilusões amorosas?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="fala_desilusoes" value="1" />
+                      <span>Nunca falo - Guardo pra mim</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="fala_desilusoes" value="2" />
+                      <span>Só com amigos próximos - Seletivo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="fala_desilusoes" value="3" />
+                      <span>Frequentemente comento - Viro piada</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="fala_desilusoes" value="4" />
+                      <span>Sempre conto - É material de comédia! 🎭</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🎵 Você escuta música de sofrência?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="musica_sofrencia" value="1" />
+                      <span>Nunca escuto - Não é meu estilo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="musica_sofrencia" value="2" />
+                      <span>Raramente - Só quando tô mal</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="musica_sofrencia" value="3" />
+                      <span>Frequentemente - Gosto do drama</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="musica_sofrencia" value="4" />
+                      <span>Sempre - Sou viciado em sofrência! 🎶</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>🍺 Você bebe quando tá triste por amor?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="bebe_tristeza" value="1" />
+                      <span>Nunca bebo por tristeza - Não é meu estilo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bebe_tristeza" value="2" />
+                      <span>Raramente - Só em casos extremos</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bebe_tristeza" value="3" />
+                      <span>Frequentemente - Álcool ameniza a dor</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="bebe_tristeza" value="4" />
+                      <span>Sempre - Cerveja é minha terapia! 🍻</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group">
+                  <h3>😂 Você faz piada da própria desilusão?</h3>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="piada_desilusao" value="1" />
+                      <span>Nunca - É assunto sério demais</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="piada_desilusao" value="2" />
+                      <span>Raramente - Só depois de muito tempo</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="piada_desilusao" value="3" />
+                      <span>Frequentemente - Rir é melhor que chorar</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="piada_desilusao" value="4" />
+                      <span>Sempre - Transformo dor em comédia! 🤡</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="question-group final-question">
+                  <h3>
+                    🎉 Se você chegou até aqui, você recebe um UPGRADE no nível
+                    de resenha!
+                  </h3>
+                  <p
+                    style="
+                      text-align: center;
+                      font-style: italic;
+                      margin: 20px 0;
+                    "
+                  >
+                    Porque ao chegar até o final, sabemos que você matou um bom
+                    tempo no trabalho respondendo e vai ter história pra contar!
+                    😄
+                  </p>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="upgrade_final" value="5" />
+                      <span
+                        >SIM! Mereço o upgrade por ter chegado até aqui!
+                        🚀</span
+                      >
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="upgrade_final" value="3" />
+                      <span>Talvez... foi divertido pelo menos 😅</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="upgrade_final" value="1" />
+                      <span
+                        >Não sei se mereço, mas respondi mesmo assim 🤷‍♂️</span
+                      >
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div class="ranking-container" id="rankingContainer">
-                <h2>
-                    <i class="fas fa-trophy"></i>
-                    Ranking dos Mais Resenhudos
-                </h2>
-                <div class="ranking-list" id="rankingList">
-                    <!-- Rankings serão inseridos aqui via JavaScript -->
-                </div>
+            <div class="navigation-buttons">
+              <button
+                type="button"
+                class="nav-btn prev"
+                id="prevBtn"
+                onclick="previousPage()"
+                disabled
+              >
+                ← Anterior
+              </button>
+              <button
+                type="button"
+                class="nav-btn next"
+                id="nextBtn"
+                onclick="nextPage()"
+              >
+                Próxima →
+              </button>
+              <button
+                type="submit"
+                class="submit-btn"
+                id="submitBtn"
+                style="display: none"
+              >
+                <span>🎯 Descobrir Meu Nível</span>
+              </button>
             </div>
-        </main>
+          </form>
+        </div>
+
+        <div
+          class="result-container"
+          id="resultContainer"
+          style="display: none"
+        >
+          <div class="result-header">
+            <h2>Seu Resultado</h2>
+          </div>
+          <div class="result-content">
+            <div class="score-display">
+              <div class="score-circle">
+                <span class="score-number" id="scoreNumber">0</span>
+                <span class="score-total">/100</span>
+              </div>
+              <div class="score-bar">
+                <div class="score-fill" id="scoreFill"></div>
+              </div>
+            </div>
+            <div class="classification">
+              <h3 id="classificationTitle">Sua Classificação</h3>
+              <div class="classification-badge" id="classificationBadge">
+                <i class="classification-icon" id="classificationIcon"></i>
+                <span id="classificationText"></span>
+              </div>
+              <p
+                class="classification-description"
+                id="classificationDescription"
+              ></p>
+            </div>
+          </div>
+          <div class="result-actions">
+            <button class="btn-secondary" onclick="resetForm()">
+              <i class="fas fa-redo"></i>
+              Fazer Novo Teste
+            </button>
+            <button class="btn-primary" onclick="shareResult()">
+              <i class="fas fa-share"></i>
+              Compartilhar Resultado
+            </button>
+          </div>
+        </div>
+
+        <div class="ranking-container" id="rankingContainer">
+          <h2>
+            <i class="fas fa-trophy"></i>
+            Ranking dos Mais Resenhudos
+          </h2>
+          <div class="ranking-list" id="rankingList">
+            <!-- Rankings serão inseridos aqui via JavaScript -->
+          </div>
+        </div>
+      </main>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
