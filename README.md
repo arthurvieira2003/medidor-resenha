@@ -1,25 +1,27 @@
-# 🎯 Medidor de Resenha
+# 🎯 Medidor de Resenha — Edição 2026
 
 Um quiz interativo para medir o nível de "resenha" de uma pessoa, agora com banco de dados PostgreSQL para armazenar pontuações e ranking!
 
 ## 🚀 Funcionalidades
 
-- ✅ Quiz interativo com 7 páginas e 34 perguntas
-- ✅ Sistema de pontuação de 0 a 100 pontos
-- ✅ 5 níveis de classificação (Estraga Resenha até Mestre da Resenha)
+- ✅ 25 perguntas novas (+18), uma por tela, com reação zoeira a cada resposta
+- ✅ Opções embaralhadas a cada pergunta (sem decorar a ordem)
+- ✅ Resenhômetro™: pontuação de 0 a 100 com ponteiro animado
+- ✅ 6 níveis (Poste de Luz com Crachá até Entidade Suprema da Resenha)
+- ✅ Laudo técnico por categoria: presença, fofoca, zoeira, rolê e safadeza
+- ✅ Ranking separado por edição (o de 2025 continua guardado no banco)
 - ✅ **Banco PostgreSQL** para persistência de dados
 - ✅ **Ranking em tempo real** com top 10 jogadores
 - ✅ **Fallback para localStorage** quando servidor indisponível
 - ✅ Interface responsiva e animada
 - ✅ Sistema de notificações
-- ✅ Easter egg secreto (Konami Code)
+- ✅ Easter egg secreto (toque 5x no selo 2026)
 
 ## 🛠️ Tecnologias
 
 ### Frontend
 - HTML5, CSS3, JavaScript (Vanilla)
-- Font Awesome para ícones
-- Google Fonts (Poppins)
+- Google Fonts (Bricolage Grotesque)
 
 ### Backend
 - Node.js + Express
@@ -131,30 +133,33 @@ CREATE TABLE pontuacoes (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   pontuacao INTEGER NOT NULL,
-  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  edicao SMALLINT NOT NULL DEFAULT 2025
 );
 
-CREATE INDEX idx_pontuacoes_pontuacao ON pontuacoes(pontuacao DESC);
+CREATE INDEX idx_pontuacoes_edicao_pontuacao ON pontuacoes(edicao, pontuacao DESC);
 ```
+
+A coluna `edicao` é criada automaticamente na inicialização (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`). Registros antigos ficam como 2025; os novos entram como 2026 e o ranking/estatísticas mostram só a edição atual (constante `EDICAO` em `server.js`).
 
 ## 🎮 Como Jogar
 
 1. **Acesse** a aplicação
-2. **Responda** as 34 perguntas sobre "resenha"
-3. **Navegue** pelas 7 páginas do quiz
-4. **Insira** seu nome ao final
-5. **Veja** seu resultado e classificação
-6. **Compare** sua pontuação no ranking
+2. **Digite** seu nome (ou apelido)
+3. **Responda** as 25 perguntas (dá pra usar as teclas A-D ou 1-4)
+4. **Veja** seu resultado no Resenhômetro™ e o laudo por categoria
+5. **Compare** sua pontuação no ranking de 2026
 
 ## 🏆 Níveis de Classificação
 
 | Pontos | Nível | Título |
 |--------|-------|--------|
-| 0-33   | 1     | Estraga Resenha |
-| 34-50  | 2     | Analisando Possível Resenha |
-| 51-67  | 3     | Resenhudo Intermediário |
-| 68-83  | 4     | Resenhudo Avançado |
-| 84-100 | 5     | Mestre da Resenha |
+| 0-15   | 1     | 🪫 Poste de Luz com Crachá |
+| 16-35  | 2     | 🧊 Estraga Resenha Raiz |
+| 36-55  | 3     | 🧳 Turista da Resenha |
+| 56-72  | 4     | 📈 Resenhudo em Ascensão |
+| 73-89  | 5     | 🏛️ Patrimônio da Resenha |
+| 90-100 | 6     | 👑 Entidade Suprema da Resenha |
 
 ## 🐳 Deploy com Docker
 

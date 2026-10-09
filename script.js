@@ -1,814 +1,632 @@
-// Configurações e dados do aplicativo
-const STORAGE_KEY = "medidor-resenha-rankings";
+// Medidor de Resenha — Edição 2026
+const STORAGE_KEY = "medidor-resenha-2026";
 
-// Classificações baseadas na pontuação
-const classificacoes = {
-  1: {
-    titulo: "Estraga Resenha",
-    descricao: `Você é uma pessoa que só pensa em trabalhar, chato pra carai, estraga resenha, procure melhorar. "Vivo para trabalhar" 🙄`,
-    icon: "fas fa-user-tie",
-    classe: "level-1",
-  },
-  2: {
-    titulo: "Analisando Possível Resenha",
-    descricao: `Você tem um pouquinho de resenha mas ainda pensa demais em trabalhar, acha que tem hora para conversar e só resenha quando sobre tempo, mas somente observa a resenha alheia sem interferir. "Não, eu não bebo nem fumo." 😒`,
-    icon: "fas fa-handshake",
-    classe: "level-2",
-  },
-  3: {
-    titulo: "Resenhudo Intermediário",
-    descricao: `Você gosta de uma boa conversa e não perde uma oportunidade de resenhar, mas ainda considera a resenha como uma distração, e não um estilo de vida. "Ai meu Deus, preciso voltar ao trabalho." 😐`,
-    icon: "fas fa-comments",
-    classe: "level-3",
-  },
-  4: {
-    titulo: "Resenhudo Avançado",
-    descricao: `Você é uma pessoa que adora e puxa conversa, abre mão de tudo para uma boa resenha, sabe muito do fute e tem sempre um trocadalho do carilho na ponta da língua. "Bora tomar uma." 🙂`,
-    icon: "fas fa-star",
-    classe: "level-4",
-  },
-  5: {
-    titulo: "Mestre da Resenha",
-    descricao: `Parabéns! Você é oficialmente um puta resenhudo! É impossível resistir a uma boa resenha porque você sabe que no fim do dia é isso que importa, você bebe até ficar torto mas a resenha não te tira do chão, é um verdadeiro mestre da resenha. "Ora, são anjos! Anjos como no céu." 😎`,
-    icon: "fas fa-crown",
-    classe: "level-5",
-  },
+const CATEGORIAS = {
+  presenca: "🎤 Presença de palco",
+  fofoca: "👀 Radar de fofoca",
+  zoeira: "🤡 Nível de zoeira",
+  role: "🍻 Disposição pro rolê",
+  safadeza: "🔥 Índice de safadeza",
 };
 
-// Elementos DOM
-const formContainer = document.getElementById("formContainer");
-const resultContainer = document.getElementById("resultContainer");
-const rankingContainer = document.getElementById("rankingContainer");
-const resenhaForm = document.getElementById("resenhaForm");
-
-// Variáveis de paginação
-let currentPage = 1;
-const totalPages = 7;
-
-// Event Listeners
-document.addEventListener("DOMContentLoaded", function () {
-  carregarRanking();
-  verificarConexaoAPI();
-
-  // Inicializar paginação
-  initializePagination();
-
-  resenhaForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    calcularResenha();
-  });
-
-  // Adicionar animações aos elementos quando aparecem na tela
-  observarElementos();
-});
-
-// Funções de paginação
-function initializePagination() {
-  updatePageDisplay();
-  updateProgressBar();
-}
-
-function nextPage() {
-  console.log("=== BOTÃO PRÓXIMA CLICADO ===");
-  console.log("Página atual antes da validação:", currentPage);
-
-  if (currentPage < totalPages) {
-    // Verificar se as perguntas da página atual foram respondidas
-    if (!validateCurrentPage()) {
-      console.log("Validação falhou! Permanecendo na página atual.");
-      alert(
-        "Por favor, responda todas as perguntas desta página antes de continuar!"
-      );
-      return;
-    }
-
-    console.log("Validação passou! Avançando para próxima página.");
-    document.getElementById(`page${currentPage}`).style.display = "none";
-    currentPage++;
-    console.log("Nova página atual:", currentPage);
-    document.getElementById(`page${currentPage}`).style.display = "block";
-    updatePageDisplay();
-    updateProgressBar();
-
-    // Scroll para o topo
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  } else {
-    console.log("Já está na última página!");
-  }
-}
-
-function previousPage() {
-  if (currentPage > 1) {
-    document.getElementById(`page${currentPage}`).style.display = "none";
-    currentPage--;
-    document.getElementById(`page${currentPage}`).style.display = "block";
-    updatePageDisplay();
-    updateProgressBar();
-
-    // Scroll para o topo
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-}
-
-function updatePageDisplay() {
-  document.getElementById("currentPage").textContent = currentPage;
-  document.getElementById("totalPages").textContent = totalPages;
-
-  // Atualizar botões
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
-  const submitBtn = document.getElementById("submitBtn");
-
-  prevBtn.disabled = currentPage === 1;
-
-  if (currentPage === totalPages) {
-    nextBtn.style.display = "none";
-    submitBtn.style.display = "block";
-  } else {
-    nextBtn.style.display = "block";
-    submitBtn.style.display = "none";
-  }
-}
-
-function updateProgressBar() {
-  const progressFill = document.getElementById("progressFill");
-  const progress = (currentPage / totalPages) * 100;
-  progressFill.style.width = `${progress}%`;
-}
-
-// Definir perguntas por página
-const questionsByPage = {
-  1: ["inicia_conversa", "pausas_cafe", "piadas_historias"],
-  2: ["redes_sociais", "fofocas", "compartilha_conteudo"],
-  3: [
-    "comemoracoes",
-    "comportamento_almoco",
-    "atividades_descontracao",
-    "musica_ambiente",
-    "sair_mesa",
-  ],
-  4: [
-    "bem_estar_colegas",
-    "datas_especiais",
-    "comportamento_reunioes",
-    "trocadilhos_bullying",
-  ],
-  5: [
-    "time_coracao",
-    "torce_brasil",
-    "ve_gols",
-    "radio_esportivo",
-    "futebol_trabalho",
-    "transferencias",
-    "conhece_jogadores",
-  ],
-  6: [
-    "foi_zona",
-    "repertorio_cortes",
-    "deixa_respirar",
-    "limite_cerveja",
-    "bebidas_hardcore",
-  ],
-  7: [
-    "desilusoes_amorosas",
-    "fala_desilusoes",
-    "musica_sofrencia",
-    "bebe_tristeza",
-    "piada_desilusao",
-    "upgrade_final",
-  ],
-};
-
-// Função para validar se todas as perguntas da página atual foram respondidas
-function validateCurrentPage() {
-  console.log("=== VALIDAÇÃO DA PÁGINA ===");
-  console.log("Página atual:", currentPage);
-
-  const questionsInPage = questionsByPage[currentPage];
-  console.log("Perguntas da página atual:", questionsInPage);
-
-  for (let questionName of questionsInPage) {
-    console.log("Verificando pergunta:", questionName);
-    const checkedInput = document.querySelector(
-      `input[name="${questionName}"]:checked`
-    );
-    console.log("Input respondido encontrado:", checkedInput);
-
-    if (!checkedInput) {
-      console.log("ERRO: Pergunta não respondida:", questionName);
-      return false;
-    } else {
-      console.log(
-        "Pergunta respondida:",
-        questionName,
-        "=",
-        checkedInput.value
-      );
-    }
-  }
-
-  console.log("Todas as perguntas da página foram respondidas!");
-  return true;
-}
-
-// Função principal para calcular o nível de resenha
-function calcularResenha() {
-  const formData = new FormData(resenhaForm);
-  const nome = formData.get("nome").trim();
-
-  if (!nome) {
-    alert("Por favor, digite seu nome!");
-    return;
-  }
-
-  // Verificar se todas as perguntas foram respondidas
-  const perguntas = [
-    "inicia_conversa",
-    "pausas_cafe",
-    "piadas_historias",
-    "redes_sociais",
-    "fofocas",
-    "compartilha_conteudo",
-    "comemoracoes",
-    "comportamento_almoco",
-    "atividades_descontracao",
-    "musica_ambiente",
-    "sair_mesa",
-    "bem_estar_colegas",
-    "datas_especiais",
-    "comportamento_reunioes",
-    "trocadilhos_bullying",
-    "time_coracao",
-    "torce_brasil",
-    "ve_gols",
-    "radio_esportivo",
-    "futebol_trabalho",
-    "transferencias",
-    "conhece_jogadores",
-    "foi_zona",
-    "repertorio_cortes",
-    "deixa_respirar",
-    "limite_cerveja",
-    "bebidas_hardcore",
-    "desilusoes_amorosas",
-    "fala_desilusoes",
-    "musica_sofrencia",
-    "bebe_tristeza",
-    "piada_desilusao",
-    "upgrade_final",
-  ];
-  let pontuacaoTotal = 0;
-  let perguntasRespondidas = 0;
-
-  perguntas.forEach((pergunta) => {
-    const valor = formData.get(pergunta);
-    if (valor) {
-      pontuacaoTotal += parseInt(valor);
-      perguntasRespondidas++;
-    }
-  });
-
-  if (perguntasRespondidas < perguntas.length) {
-    alert("Por favor, responda todas as perguntas!");
-    return;
-  }
-
-  // Determinar classificação (agora com 34 perguntas, pontuação máxima = 137)
-  const pontuacaoMaxima = 137;
-  const pontuacaoPercentual = (pontuacaoTotal / pontuacaoMaxima) * 100;
-
-  let nivelClassificacao;
-  if (pontuacaoPercentual <= 33.6) {
-    // até 46 pontos
-    nivelClassificacao = 1;
-  } else if (pontuacaoPercentual <= 50.4) {
-    // até 69 pontos
-    nivelClassificacao = 2;
-  } else if (pontuacaoPercentual <= 67.2) {
-    // até 92 pontos
-    nivelClassificacao = 3;
-  } else if (pontuacaoPercentual <= 83.9) {
-    // até 115 pontos
-    nivelClassificacao = 4;
-  } else {
-    nivelClassificacao = 5;
-  }
-
-  // Salvar resultado (enviar pontuação percentual para o banco)
-  salvarResultado(nome, Math.round(pontuacaoPercentual), nivelClassificacao);
-
-  // Mostrar resultado com animação (mostrar pontuação bruta na tela)
-  mostrarResultado(nome, pontuacaoTotal, nivelClassificacao);
-}
-
-// Função para mostrar o resultado
-function mostrarResultado(nome, pontuacao, nivel) {
-  const classificacao = classificacoes[nivel];
-
-  // Esconder formulário e mostrar resultado
-  formContainer.style.display = "none";
-  resultContainer.style.display = "block";
-
-  // Animar pontuação
-  animarPontuacao(pontuacao);
-
-  // Preencher dados da classificação
-  document.getElementById(
-    "classificationTitle"
-  ).textContent = `Parabéns, ${nome}!`;
-  document.getElementById("classificationIcon").className = classificacao.icon;
-  document.getElementById("classificationText").textContent =
-    classificacao.titulo;
-  document.getElementById("classificationDescription").textContent =
-    classificacao.descricao;
-
-  const badge = document.getElementById("classificationBadge");
-  badge.className = `classification-badge ${classificacao.classe}`;
-
-  // Scroll suave para o resultado
-  resultContainer.scrollIntoView({ behavior: "smooth" });
-
-  // Atualizar ranking
-  carregarRanking();
-}
-
-// Função para animar a pontuação
-function animarPontuacao(pontuacaoFinal) {
-  const scoreNumber = document.getElementById("scoreNumber");
-  const scoreFill = document.getElementById("scoreFill");
-
-  const pontuacaoMaxima = 137; // 34 perguntas (33 x 4 pontos + 1 x 5 pontos)
-  const pontuacaoMaximaExibicao = 100; // Escala de 0 a 100 para exibição
-
-  // Converter pontuação para escala de 0 a 100
-  const pontuacaoConvertida = Math.round(
-    (pontuacaoFinal / pontuacaoMaxima) * pontuacaoMaximaExibicao
-  );
-
-  let pontuacaoAtual = 0;
-  const incremento = pontuacaoConvertida / 50; // 50 frames de animação
-
-  const intervalo = setInterval(() => {
-    pontuacaoAtual += incremento;
-
-    if (pontuacaoAtual >= pontuacaoConvertida) {
-      pontuacaoAtual = pontuacaoConvertida;
-      clearInterval(intervalo);
-    }
-
-    scoreNumber.textContent = Math.round(pontuacaoAtual);
-  }, 40);
-
-  // Animar barra de progresso
-  setTimeout(() => {
-    scoreFill.style.width = `${pontuacaoConvertida}%`;
-  }, 500);
-}
-
-// Função para salvar resultado no PostgreSQL
-async function salvarResultado(nome, pontuacao, nivel) {
-  try {
-    // Salvar no banco PostgreSQL
-    const response = await fetch('/api/pontuacao', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        nome: nome.trim(),
-        pontuacao: pontuacao
-      })
-    });
-
-    const result = await response.json();
-
-    if (response.ok && result.success) {
-      console.log('✅ Resultado salvo no banco:', result.data);
-      
-      // Atualizar exibição do ranking
-      await carregarRanking();
-      
-      // Mostrar notificação de sucesso
-      mostrarNotificacao('Pontuação salva com sucesso!', 'success');
-    } else {
-      throw new Error(result.error || 'Erro ao salvar pontuação');
-    }
-  } catch (error) {
-    console.error('❌ Erro ao salvar resultado:', error);
-    
-    // Fallback para localStorage em caso de erro (usar pontuação percentual)
-    const pontuacaoMaxima = 137;
-    const pontuacaoPercentual = Math.round((pontuacao / pontuacaoMaxima) * 100);
-    salvarResultadoLocal(nome, pontuacaoPercentual, nivel);
-    mostrarNotificacao('Pontuação salva localmente (sem conexão com servidor)', 'warning');
-  }
-}
-
-// Função de fallback para localStorage
-function salvarResultadoLocal(nome, pontuacao, nivel) {
-  try {
-    let rankings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    
-    const novoResultado = {
-      id: Date.now(),
-      nome: nome.trim(),
-      pontuacao: pontuacao,
-      nivel: nivel,
-      data: new Date().toISOString(),
-    };
-    
-    rankings.push(novoResultado);
-    rankings.sort((a, b) => b.pontuacao - a.pontuacao);
-    rankings = rankings.slice(0, 10);
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(rankings));
-    carregarRankingLocal();
-  } catch (error) {
-    console.error('❌ Erro ao salvar no localStorage:', error);
-  }
-}
-
-// Função para carregar ranking do PostgreSQL
-async function carregarRanking() {
-  try {
-    // Tentar carregar do banco PostgreSQL
-    const response = await fetch('/api/ranking');
-    
-    if (response.ok) {
-      const result = await response.json();
-      
-      if (result.success) {
-        exibirRanking(result.data, 'database');
-        return;
-      }
-    }
-    
-    // Fallback para localStorage
-    console.log('⚠️ Carregando ranking do localStorage (fallback)');
-    carregarRankingLocal();
-    
-  } catch (error) {
-    console.error('❌ Erro ao carregar ranking do servidor:', error);
-    carregarRankingLocal();
-  }
-}
-
-// Função para carregar ranking do localStorage (fallback)
-function carregarRankingLocal() {
-  try {
-    const rankings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    exibirRanking(rankings, 'local');
-  } catch (error) {
-    console.error('❌ Erro ao carregar ranking local:', error);
-  }
-}
-
-// Função para exibir ranking (unificada)
-function exibirRanking(rankings, source) {
-  const rankingList = document.getElementById('rankingList');
-  if (!rankingList) return;
-
-  if (rankings.length === 0) {
-    rankingList.innerHTML = `
-      <div style="text-align: center; padding: 40px; color: #666;">
-        <i class="fas fa-trophy" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
-        <p style="font-size: 1.2rem;">Nenhum resultado ainda!</p>
-        <p>Seja o primeiro a fazer o teste!</p>
-        <small class="source-info">Fonte: ${source === 'database' ? 'Banco de dados' : 'Armazenamento local'}</small>
-      </div>
-    `;
-    return;
-  }
-
-  rankingList.innerHTML = "";
-
-  rankings.forEach((item, index) => {
-    const posicao = index + 1;
-    let classeposicao = "";
-    let iconeposicao = "";
-
-    if (posicao === 1) {
-      classeposicao = "first";
-      iconeposicao = '<i class="fas fa-crown"></i>';
-    } else if (posicao === 2) {
-      classeposicao = "second";
-      iconeposicao = '<i class="fas fa-medal"></i>';
-    } else if (posicao === 3) {
-      classeposicao = "third";
-      iconeposicao = '<i class="fas fa-award"></i>';
-    }
-
-    // Determinar nível baseado na pontuação
-    const nivel = determinarNivel(item.pontuacao);
-    
-    const rankingItem = document.createElement("div");
-    rankingItem.className = "ranking-item";
-    rankingItem.style.animationDelay = `${index * 0.1}s`;
-
-    rankingItem.innerHTML = `
-      <div class="ranking-position ${classeposicao}">
-        ${iconeposicao}
-        ${posicao}º
-      </div>
-      <div class="ranking-info">
-        <div class="ranking-name">${item.nome}</div>
-        <div class="ranking-classification">${classificacoes[nivel]?.titulo || 'Nível ' + nivel}</div>
-      </div>
-      <div class="ranking-score">${item.pontuacao}/100</div>
-    `;
-
-    rankingList.appendChild(rankingItem);
-  });
-
-  // Adicionar indicador da fonte dos dados
-  const sourceIndicator = document.createElement('div');
-  sourceIndicator.className = 'source-indicator';
-  sourceIndicator.innerHTML = `
-    <small style="text-align: center; display: block; margin-top: 20px; color: #666;">
-      <i class="fas fa-${source === 'database' ? 'database' : 'save'}"></i>
-      ${source === 'database' ? 'Dados do servidor' : 'Dados locais'}
-    </small>
-  `;
-  rankingList.appendChild(sourceIndicator);
-}
-
-// Função auxiliar para determinar nível baseado na pontuação
-function determinarNivel(pontuacao) {
-  // Pontuação já vem como percentual (0-100)
-  if (pontuacao <= 33.6) return 1;
-  if (pontuacao <= 50.4) return 2;
-  if (pontuacao <= 67.2) return 3;
-  if (pontuacao <= 83.9) return 4;
-  return 5;
-}
-
-// Função para verificar conexão com API
-async function verificarConexaoAPI() {
-  try {
-    const response = await fetch('/api/health');
-    if (response.ok) {
-      console.log('✅ Conexão com API estabelecida');
-    }
-  } catch (error) {
-    console.log('⚠️ API não disponível, usando armazenamento local');
-  }
-}
-
-// Função para mostrar notificações
-function mostrarNotificacao(mensagem, tipo = 'info') {
-  // Criar elemento de notificação
-  const notificacao = document.createElement('div');
-  notificacao.className = `notificacao notificacao-${tipo}`;
-  notificacao.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 5px;
-    color: white;
-    z-index: 10000;
-    animation: slideIn 0.3s ease;
-  `;
-  
-  // Definir cor baseada no tipo
-  const cores = {
-    success: '#4CAF50',
-    warning: '#FF9800',
-    error: '#F44336',
-    info: '#2196F3'
-  };
-  
-  notificacao.style.backgroundColor = cores[tipo] || cores.info;
-  notificacao.textContent = mensagem;
-  
-  document.body.appendChild(notificacao);
-  
-  // Remover após 3 segundos
-  setTimeout(() => {
-    notificacao.style.animation = 'slideOut 0.3s ease';
-    setTimeout(() => {
-      if (notificacao.parentNode) {
-        notificacao.parentNode.removeChild(notificacao);
-      }
-    }, 300);
-  }, 3000);
-}
-
-// Função para resetar o formulário
-function resetForm() {
-  resenhaForm.reset();
-  formContainer.style.display = "block";
-  resultContainer.style.display = "none";
-
-  // Scroll suave para o formulário
-  formContainer.scrollIntoView({ behavior: "smooth" });
-}
-
-// Função para compartilhar resultado
-function shareResult() {
-  const nome = document
-    .getElementById("classificationTitle")
-    .textContent.replace("Parabéns, ", "")
-    .replace("!", "");
-  const classificacao =
-    document.getElementById("classificationText").textContent;
-  const pontuacao = document.getElementById("scoreNumber").textContent;
-
-  const texto =
-    `🎯 Acabei de descobrir meu nível de resenha!\n\n` +
-    `👤 ${nome}\n` +
-    `🏆 ${classificacao}\n` +
-    `📊 Pontuação: ${Math.round((pontuacao / 137) * 100)}/100\n\n` +
-    `Faça você também o teste e descubra se é mais resenhudo que eu! 😄`;
-
-  if (navigator.share) {
-    navigator.share({
-      title: "Meu Resultado no Medidor de Resenha",
-      text: texto,
-    });
-  } else {
-    // Fallback para copiar para clipboard
-    navigator.clipboard
-      .writeText(texto)
-      .then(() => {
-        alert("Resultado copiado para a área de transferência!");
-      })
-      .catch(() => {
-        // Fallback manual
-        const textArea = document.createElement("textarea");
-        textArea.value = texto;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        alert("Resultado copiado para a área de transferência!");
-      });
-  }
-}
-
-// Função para observar elementos e adicionar animações
-function observarElementos() {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = "1";
-          entry.target.style.transform = "translateY(0)";
-        }
-      });
-    },
-    {
-      threshold: 0.1,
-    }
-  );
-
-  // Observar elementos que devem ser animados
-  document.querySelectorAll(".question-group").forEach((el) => {
-    el.style.opacity = "0";
-    el.style.transform = "translateY(20px)";
-    el.style.transition = "all 0.6s ease";
-    observer.observe(el);
-  });
-}
-
-// Adicionar efeitos sonoros (opcional)
-function playSound(type) {
-  // Criar contexto de áudio
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-  let frequency;
-  switch (type) {
-    case "success":
-      frequency = 800;
-      break;
-    case "click":
-      frequency = 400;
-      break;
-    default:
-      frequency = 600;
-  }
-
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-
-  oscillator.frequency.value = frequency;
-  oscillator.type = "sine";
-
-  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(
-    0.01,
-    audioContext.currentTime + 0.3
-  );
-
-  oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + 0.3);
-}
-
-// Adicionar efeitos de hover nos botões
-document.addEventListener("DOMContentLoaded", function () {
-  // Efeito de partículas no botão de submit
-  const submitBtn = document.querySelector(".submit-btn");
-
-  submitBtn.addEventListener("click", function (e) {
-    createParticles(e.target);
-  });
-});
-
-// Função para criar efeito de partículas
-function createParticles(element) {
-  const rect = element.getBoundingClientRect();
-  const particles = 15;
-
-  for (let i = 0; i < particles; i++) {
-    const particle = document.createElement("div");
-    particle.style.position = "fixed";
-    particle.style.left = rect.left + rect.width / 2 + "px";
-    particle.style.top = rect.top + rect.height / 2 + "px";
-    particle.style.width = "4px";
-    particle.style.height = "4px";
-    particle.style.backgroundColor = "#667eea";
-    particle.style.borderRadius = "50%";
-    particle.style.pointerEvents = "none";
-    particle.style.zIndex = "9999";
-
-    document.body.appendChild(particle);
-
-    const angle = (i / particles) * Math.PI * 2;
-    const velocity = 100;
-    const lifetime = 1000;
-
-    particle.animate(
-      [
-        {
-          transform: "translate(0, 0) scale(1)",
-          opacity: 1,
-        },
-        {
-          transform: `translate(${Math.cos(angle) * velocity}px, ${
-            Math.sin(angle) * velocity
-          }px) scale(0)`,
-          opacity: 0,
-        },
-      ],
-      {
-        duration: lifetime,
-        easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-      }
-    ).onfinish = () => {
-      particle.remove();
-    };
-  }
-}
-
-// Easter egg - Konami Code
-let konamiCode = [];
-const konamiSequence = [
-  "ArrowUp",
-  "ArrowUp",
-  "ArrowDown",
-  "ArrowDown",
-  "ArrowLeft",
-  "ArrowRight",
-  "ArrowLeft",
-  "ArrowRight",
-  "KeyB",
-  "KeyA",
+// Cada opção: [pontos 0-3, texto, reação]
+const PERGUNTAS = [
+  {
+    emoji: "🚗", cat: "zoeira",
+    texto: "O Petini começa a falar do Nissan Sentra dele pela 47ª vez. Você:",
+    opcoes: [
+      [0, "Escuto com atenção. Vai que dessa vez tem informação nova.", "Paciência de monge 🧘"],
+      [1, "Balanço a cabeça e penso na janta.", "Concordar sem ouvir: técnica milenar"],
+      [2, "Pergunto se o Sentra vem com toca-fitas de fábrica.", "Provocação nível 1 😏"],
+      [3, "Gero com IA um comercial do Petini vendendo o Sentra no Mercado Livre.", "Ele vai discordar. \"NÃO!\" 🚫"],
+    ],
+  },
+  {
+    emoji: "🤮", cat: "role",
+    texto: "Qual foi o seu maior vexame de bebedeira?",
+    opcoes: [
+      [0, "Nunca passei do segundo copo.", "Fígado intacto, alma vazia"],
+      [1, "Dormi no sofá da festa.", "Clássico. Respeitável."],
+      [2, "Mandei \"oi, sumida\" pra ex às 3h da manhã.", "Visualizou e não respondeu 💔"],
+      [3, "Acordei sem um sapato, abraçado num cone de trânsito e sem lembrar de nada.", "Lenda urbana em carne e osso 🚧"],
+    ],
+  },
+  {
+    emoji: "🤓", cat: "zoeira",
+    texto: "Você começa a explicar uma coisa pro Nicolas e ele já solta: \"já sei\". Você:",
+    opcoes: [
+      [0, "Paro de explicar. Se ele disse que sabe, sabe.", "Confiança cega (literalmente) 🙈"],
+      [1, "Explico de novo, bem devagar.", "Paciência de professor de pré 🖍️"],
+      [2, "Peço: \"então explica aí pra mim\".", "Xeque-mate em um lance ♟️"],
+      [3, "Deixo ele implementar no SE Suite e já preparo a pipoca pro bug.", "Spoiler: virou bug 🐛"],
+    ],
+  },
+  {
+    emoji: "💃", cat: "safadeza",
+    texto: "Você entrou num puteiro. \"Só pra conhecer\", claro. Qual é a sua?",
+    opcoes: [
+      [0, "Peço uma água e fico olhando o relógio.", "Visita técnica sem compromisso 📋"],
+      [1, "Tomo uma cerveja e desabafo sobre a vida com a moça.", "Terapia com nota fiscal 🛋️"],
+      [2, "Pago umas rodadas e viro amigo do DJ.", "Já tá com nome na lista VIP 🎧"],
+      [3, "Saio de lá com cartão fidelidade e o garçom me chamando pelo nome.", "Cliente diamante 💎"],
+    ],
+  },
+  {
+    emoji: "🎙️", cat: "presenca",
+    texto: "Qual a duração média dos seus áudios no WhatsApp?",
+    opcoes: [
+      [0, "Não mando áudio. Texto formal, com ponto final.", "Ponto final no zap é agressão 😬"],
+      [1, "Até 30 segundos, direto ao ponto.", "Objetivo demais pra ser resenhudo"],
+      [2, "Uns 2 minutos, com introdução e conclusão.", "Um TCC por áudio. Respeito."],
+      [3, "Podcast. Tem pausa dramática e \"peraí que vou mudar de lugar\".", "O Spotify quer te contratar 🎧"],
+    ],
+  },
+  {
+    emoji: "💸", cat: "role",
+    texto: "O Lucas olha o cardápio e solta: \"tá caro, né cara...\". Era um pão de queijo de R$ 4. Você:",
+    opcoes: [
+      [0, "Concordo. Tá tudo caro mesmo.", "Contaminado pela muquiranagem 🪙"],
+      [1, "Pago o meu e finjo que não ouvi.", "Neutralidade suíça 🇨🇭"],
+      [2, "Ofereço parcelar em 3x sem juros.", "Consultoria financeira grátis 📊"],
+      [3, "Abro uma vaquinha online \"Ajude o Lucas a comer\" com meta de R$ 4,00.", "Rico de dinheiro, pobre de pão de queijo 🧀"],
+    ],
+  },
+  {
+    emoji: "👕", cat: "fofoca",
+    texto: "Seu amigo some com alguém na festa e volta 20 minutos depois com a camisa do avesso. Você:",
+    opcoes: [
+      [0, "Nem reparo. Cada um com a sua vida.", "Discrição de cofre suíço 🔒"],
+      [1, "Dou um sorrisinho e fico quieto.", "Sabe, mas não fala. Por enquanto."],
+      [2, "Pergunto \"e aí, como foi?\" na frente de todo mundo.", "Coletiva de imprensa improvisada 🎙️"],
+      [3, "Já anunciei no grupo antes dele voltar, com foto da camisa.", "Furo jornalístico 🗞️"],
+    ],
+  },
+  {
+    emoji: "🗑️", cat: "zoeira",
+    texto: "O Vitinho roda um DELETE sem WHERE e apaga o banco de produção. Qual é a sua?",
+    opcoes: [
+      [0, "Ajudo a restaurar o backup em silêncio. Isso é sério.", "Profissional demais pra este teste"],
+      [1, "Mando um \"força, campeão\" no privado.", "Apoio emocional básico 🫂"],
+      [2, "Seguro o riso até ele sair da sala.", "Autocontrole digno de Oscar 🏆"],
+      [3, "Imprimo o comando, emolduro e penduro na parede.", "Cuidado: ele é baixinho, mas chifra 🐂"],
+    ],
+  },
+  {
+    emoji: "🏩", cat: "safadeza",
+    texto: "Motel. Você é do tipo que:",
+    opcoes: [
+      [0, "Nunca fui. Isso é coisa de novela.", "Nem na novela das 9? 📺"],
+      [1, "Pega a suíte mais barata e não encosta em nada.", "Pernoite modo Lucas 🪙"],
+      [2, "Pede o cardápio inteiro e estreia a hidro.", "Aproveitando cada centavo 🛁"],
+      [3, "É chamado pelo nome na recepção e já tem suíte favorita.", "Sócio-torcedor do motel 🏩"],
+    ],
+  },
+  {
+    emoji: "😴", cat: "zoeira",
+    texto: "Você flagra o Caetano cochilando sentado, em pleno turno. Você:",
+    opcoes: [
+      [0, "Deixo ele dormir. Coitado, deve estar cansado.", "Coração mole demais 🥺"],
+      [1, "Dou um cutucão discreto antes que alguém veja.", "Anjo da guarda do chimpas 😇"],
+      [2, "Tiro uma foto pro acervo pessoal.", "Arquivo confidencial salvo 📁"],
+      [3, "Chamo o Maurício pra repetir o flagra e gravo a cena.", "Reprise do clássico 🎬"],
+    ],
+  },
+  {
+    emoji: "🎤", cat: "presenca",
+    texto: "Karaokê, 2h da manhã. Qual é a sua?",
+    opcoes: [
+      [0, "Não canto. Fico segurando as bolsas e os casacos.", "Cabideiro oficial 🧥"],
+      [1, "Uma do Legião, baixinho, lá no fundo.", "Tímido, mas com bom gosto"],
+      [2, "\"Evidências\" em dueto, com drama e mão no peito.", "O Brasil inteiro sabe essa 🇧🇷"],
+      [3, "Subo na mesa e canto \"Garçom\" do Reginaldo Rossi chorando de verdade.", "Prêmio Multishow de bêbado 🏆"],
+    ],
+  },
+  {
+    emoji: "👴", cat: "fofoca",
+    texto: "O Petini começa: \"Quando eu trabalhava na Ambev...\". Você:",
+    opcoes: [
+      [0, "Puxo uma cadeira. Vai demorar.", "Assinante do podcast do Petini 🎙️"],
+      [1, "Lembro de uma reunião urgente que não existe.", "Fuga tática 🏃"],
+      [2, "Completo antes dele: \"...e na Thomson também\".", "Já decorou o roteiro 📜"],
+      [3, "Solto um \"ué, xoven\" antes dele e roubo o bordão.", "Roubo de bordão à mão armada 😂"],
+    ],
+  },
+  {
+    emoji: "🥂", cat: "safadeza",
+    texto: "Despedida de solteiro de um amigo. Qual roteiro você monta?",
+    opcoes: [
+      [0, "Jantar tranquilo e todo mundo em casa às 22h.", "Isso é despedida ou culto? ⛪"],
+      [1, "Churrasco com os caras e uma resenha leve.", "Seguro. Sem graça, mas seguro."],
+      [2, "Balada, open bar e alguém vomitando no Uber.", "Taxa de limpeza: R$ 150 🤮"],
+      [3, "Puteiro, karaokê e o noivo acordando em outra cidade sem a aliança.", "Se Beber, Não Case: versão nacional 🎬"],
+    ],
+  },
+  {
+    emoji: "🏍️", cat: "presenca",
+    texto: "Passa uma moto na rua e o Flávio começa: \"VRÁÁÁUM, VRUUUM\". Você:",
+    opcoes: [
+      [0, "Finjo que não conheço ele.", "Vergonha alheia ativada 🙈"],
+      [1, "Dou um sorrisinho amarelo.", "Sorriso de RH 🙂"],
+      [2, "Faço a troca de marcha junto.", "Dupla dinâmica 🏁"],
+      [3, "Narro igual o Galvão e o escritório inteiro entra na corrida.", "Largada autorizada pelo gerente 🏍️"],
+    ],
+  },
+  {
+    emoji: "🎭", cat: "role",
+    texto: "Carnaval. Onde você tá?",
+    opcoes: [
+      [0, "Em casa, vendo desfile na TV.", "Carnaval via satélite 📡"],
+      [1, "Num retiro espiritual, fugindo da muvuca.", "Fugiu da folia, achou o tédio"],
+      [2, "No bloquinho, de glitter, até a Quarta de Cinzas.", "Purpurina até no fígado ✨"],
+      [3, "Beijei 14 pessoas, perdi o celular e acordei com a fantasia de outra pessoa.", "O carnaval passou por você e levou tudo 🎊"],
+    ],
+  },
+  {
+    emoji: "✨", cat: "zoeira",
+    texto: "O Brayan sobe pro sistema uma feature que ninguém pediu (e só ele gosta). Você:",
+    opcoes: [
+      [0, "Testo, faço code review e sugiro melhorias.", "Mentor exemplar. Chato, mas exemplar."],
+      [1, "Ignoro. Um dia alguém percebe.", "Deixa a vida me levar 🎶"],
+      [2, "Pergunto quem pediu. Em voz alta. Na frente de todo mundo.", "Pergunta inocente, efeito devastador"],
+      [3, "Anuncio no grupo: \"NOVA FEATURE: ninguém pediu, ninguém usa, mas o Brayan ama ❤️\".", "Lançamento mundial 🚀"],
+    ],
+  },
+  {
+    emoji: "📸", cat: "presenca",
+    texto: "Você manda sem querer uma foto comprometedora no grupo da família. Você:",
+    opcoes: [
+      [0, "Impossível. Não tenho foto comprometedora.", "Vida limpa demais pra este teste"],
+      [1, "Apago em 2 segundos e rezo pra ninguém ter visto.", "A tia viu. A tia sempre vê 👵"],
+      [2, "Digo que fui hackeado.", "Desculpa de político 🧑‍⚖️"],
+      [3, "Mando um \"e aí, gostaram?\" e saio do grupo.", "Banido do Natal 🎄"],
+    ],
+  },
+  {
+    emoji: "🌡️", cat: "safadeza",
+    texto: "O Caetano solta mais uma cantada do nada, no meio do expediente. Você:",
+    opcoes: [
+      [0, "Finjo que não ouvi e volto pro trabalho.", "Imunidade de rebanho 💉"],
+      [1, "Dou uma risada sem graça.", "Riso nervoso detectado"],
+      [2, "Respondo na mesma altura e vira batalha de cantada.", "Duelo de mormaço 🔥"],
+      [3, "Anoto todas num caderninho: \"Poesias do Caetano, Vol. 3\".", "Já tem editora interessada 📚"],
+    ],
+  },
+  {
+    emoji: "💔", cat: "fofoca",
+    texto: "O ex de alguém do grupo aparece no rolê. Você:",
+    opcoes: [
+      [0, "Finjo que não sei de nada.", "Suíça emocional 🏳️"],
+      [1, "Fico de olho pra ver se vai dar treta.", "Segurança voluntário 👀"],
+      [2, "Pego a pipoca e narro baixinho pros amigos.", "Transmissão ao vivo 📺"],
+      [3, "Apresento ele pro atual: \"vocês têm muito em comum\".", "Agente do caos 😈"],
+    ],
+  },
+  {
+    emoji: "🐂", cat: "zoeira",
+    texto: "O Vitinho surta do nada porque o mouse travou. Você:",
+    opcoes: [
+      [0, "Fico quieto e saio de perto devagar.", "Instinto de sobrevivência 🦺"],
+      [1, "Ofereço um copo d'água.", "Bombeiro da paz 🚒"],
+      [2, "Coloco música de tourada de fundo.", "Olé! 🎺"],
+      [3, "Balanço um pano vermelho na frente dele.", "Tourada liberada. Boa sorte 🚩"],
+    ],
+  },
+  {
+    emoji: "🍻", cat: "role",
+    texto: "Sexta, fim de tarde. Alguém fala: \"só uma geladinha rápida\". Você:",
+    opcoes: [
+      [0, "Já tô em casa de pijama.", "Fugitivo profissional 🏃"],
+      [1, "Vou, tomo um refri e saio às 19h em ponto.", "Presença simbólica registrada"],
+      [2, "Vou e fico até a saideira.", "Saideira é compromisso 🍺"],
+      [3, "\"Só uma\" terminou sábado de manhã num karaokê.", "Ninguém sabe como, todo mundo lembra 🎤"],
+    ],
+  },
+  {
+    emoji: "🦸", cat: "presenca",
+    texto: "Sexta, 17h58, tudo pegando fogo, sistema fora do ar. O Maurício resolve em 5 minutos. Você:",
+    opcoes: [
+      [0, "Agradeço formalmente por e-mail.", "Protocolo corporativo 📧"],
+      [1, "Mando um \"valeu, mestre\" no chat.", "O mínimo. Ok."],
+      [2, "Puxo uma salva de palmas na sala.", "Ovação merecida 👏"],
+      [3, "Proponho estátua de bronze do Maurício na entrada e feriado em homenagem.", "Salve o monstro supremo 🗿"],
+    ],
+  },
+  {
+    emoji: "💅", cat: "zoeira",
+    texto: "Alguém manda no grupo um vídeo feito com IA do Petini dançando de cropped. Você:",
+    opcoes: [
+      [0, "Peço pra apagarem. Isso é bullying.", "Defensor dos oprimidos 🛡️"],
+      [1, "Dou risada, mas não compartilho.", "Cúmplice silencioso 🤫"],
+      [2, "Repasso pra mais 3 grupos.", "Distribuidor oficial 📦"],
+      [3, "Faço a parte 2 com ele de salto alto e peruca, em 4K.", "Masculinidade frágil: DESTRUÍDA 💅"],
+    ],
+  },
+  {
+    emoji: "⏳", cat: "fofoca",
+    texto: "O Arthur jura que \"amanhã termina\" aquele projeto. Você:",
+    opcoes: [
+      [0, "Acredito. Por que ele mentiria?", "Inocência comovente 🥹"],
+      [1, "Anoto na agenda pra cobrar depois.", "Gerente de projeto não remunerado"],
+      [2, "Aposto um café que não termina.", "Aposta segura ☕"],
+      [3, "Colo na parede um contador: \"dias desde a promessa do Arthur: 84\".", "Ele entrega. Um dia. Talvez. ⏳"],
+    ],
+  },
+  {
+    emoji: "🪷", cat: "safadeza",
+    texto: "A turma decide levar o Nicolas na Deva Chameli pra ele finalmente perder o cabaço. Você:",
+    opcoes: [
+      [0, "Cada um tem seu tempo. Deixa o menino em paz.", "Coração puro demais 🕊️"],
+      [1, "Vou junto, mas fico na recepção tomando chá.", "Apoio moral na sala de espera 🍵"],
+      [2, "Racho a conta pra garantir o pacote completo.", "Investidor-anjo do Nicolas 👼"],
+      [3, "Organizo tudo, fecho o pacote premium e faço discurso de formatura na saída.", "Ele vai dizer \"já sei\". Não sabe. 🫣"],
+    ],
+  },
 ];
 
-document.addEventListener("keydown", function (e) {
-  konamiCode.push(e.code);
+const MAX_PONTOS = PERGUNTAS.length * 3;
 
-  if (konamiCode.length > konamiSequence.length) {
-    konamiCode.shift();
-  }
+const NIVEIS = [
+  {
+    min: 0, emoji: "🪫", cor: "#9aa0a6",
+    titulo: "Poste de Luz com Crachá",
+    desc: "Você é o modo avião em forma de gente. Entra mudo, sai calado, e tem gente que jura que você é um holograma.",
+    frase: "\"Já sei.\" (não sabia.)",
+  },
+  {
+    min: 16, emoji: "🧊", cor: "#4d7cff",
+    titulo: "Estraga Resenha Raiz",
+    desc: "Quando você chega, a roda se desfaz sozinha. Recusa o rolê, acha tudo caro e ainda solta um \"bora focar, pessoal\" que ninguém pediu.",
+    frase: "\"Ah, não vou não... tá caro, né cara.\"",
+  },
+  {
+    min: 36, emoji: "🧳", cor: "#a06bff",
+    titulo: "Turista da Resenha",
+    desc: "Você visita a resenha, tira umas fotos, ri das piadas... mas não mora nela. Ainda acha que tem hora certa pra resenhar.",
+    frase: "\"Ai, preciso voltar, tenho call.\"",
+  },
+  {
+    min: 56, emoji: "📈", cor: "#ff7a1a",
+    titulo: "Resenhudo em Ascensão",
+    desc: "Já puxa papo, já tem apelido pra alguém e já mandou áudio de mais de 2 minutos. Quem vê de fora não dá nada, mas o potencial é real.",
+    frase: "\"Me chamam de mormaço: não parece, mas queimo.\" 🔥",
+  },
+  {
+    min: 73, emoji: "🏛️", cor: "#ff4fa3",
+    titulo: "Patrimônio da Resenha",
+    desc: "Tombado pelo IPHAN da zoeira. Sem você, o rolê é só um encontro de pessoas. Você não participa da resenha: você É a pauta.",
+    frase: "\"VRÁÁÁUM, VRUUUM!\" 🏍️",
+  },
+  {
+    min: 90, emoji: "👑", cor: "#c6ff3d",
+    titulo: "Entidade Suprema da Resenha",
+    desc: "Lenda viva, monstro supremo, nível Maurício. Até o Brayan conta histórias sobre você. A vida é só um intervalo entre uma resenha e outra.",
+    frase: "\"Ora, são anjos! Anjos como no céu.\" 😎",
+  },
+];
 
-  if (konamiCode.join(",") === konamiSequence.join(",")) {
-    ativarEasterEgg();
-    konamiCode = [];
-  }
-});
+const FRASES_LOADING = [
+  "Consultando o VAR da resenha...",
+  "Ouvindo seus áudios de 7 minutos...",
+  "Conferindo com o Conselho Nacional da Resenha...",
+  "Calibrando o Resenhômetro™...",
+];
 
-function ativarEasterEgg() {
-  document.body.style.animation = "rainbow 2s infinite";
+// ---------- Estado ----------
+let nome = "";
+let atual = 0;
+let respostas = [];
+let travado = false;
 
-  const style = document.createElement("style");
-  style.textContent = `
-        @keyframes rainbow {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-    `;
-  document.head.appendChild(style);
+const $ = (id) => document.getElementById(id);
+const embaralhar = (arr) => arr.map((v) => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map((p) => p[1]);
+const reduzMovimento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function mostrarTela(nomeTela) {
+  document.querySelectorAll(".screen").forEach((s) => (s.hidden = s.dataset.screen !== nomeTela));
+  window.scrollTo({ top: 0, behavior: reduzMovimento ? "auto" : "smooth" });
+}
+
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ---------- Quiz ----------
+function iniciarQuiz() {
+  atual = 0;
+  respostas = [];
+  mostrarTela("quiz");
+  renderPergunta();
+}
+
+function renderPergunta() {
+  const p = PERGUNTAS[atual];
+  const card = $("questionCard");
+  card.style.setProperty("--accent", ["#ffd23f", "#c6ff3d", "#7ee0ff", "#ffb3d9", "#ffb36b"][atual % 5]);
+  card.classList.remove("enter");
+  void card.offsetWidth; // reinicia a animação
+  card.classList.add("enter");
+
+  $("qEmoji").textContent = p.emoji;
+  $("qCat").textContent = CATEGORIAS[p.cat];
+  $("qText").textContent = p.texto;
+  $("counter").textContent = `${String(atual + 1).padStart(2, "0")}/${PERGUNTAS.length}`;
+  $("progressFill").style.width = `${(atual / PERGUNTAS.length) * 100}%`;
+  $("progress").setAttribute("aria-valuenow", atual);
+  $("backBtn").style.visibility = atual === 0 ? "hidden" : "visible";
+  $("reaction").classList.remove("show");
+
+  const box = $("options");
+  box.innerHTML = "";
+  embaralhar(p.opcoes).forEach(([pontos, texto, reacao], i) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "option";
+    btn.dataset.key = "ABCD"[i];
+    btn.textContent = texto;
+    if (respostas[atual] === pontos) btn.classList.add("picked");
+    btn.addEventListener("click", () => responder(btn, pontos, reacao));
+    box.appendChild(btn);
+  });
+  travado = false;
+}
+
+function responder(btn, pontos, reacao) {
+  if (travado) return;
+  travado = true;
+  respostas[atual] = pontos;
+  document.querySelectorAll(".option").forEach((o) => o.classList.toggle("picked", o === btn));
+
+  const r = $("reaction");
+  r.textContent = reacao;
+  r.classList.remove("show");
+  void r.offsetWidth;
+  r.classList.add("show");
 
   setTimeout(() => {
-    document.body.style.animation = "";
-    style.remove();
-  }, 10000);
-
-  alert(
-    "🎉 Easter Egg ativado! Você descobriu o segredo do medidor de resenha! 🌈"
-  );
+    atual++;
+    if (atual < PERGUNTAS.length) renderPergunta();
+    else finalizar();
+  }, reduzMovimento ? 700 : 1100);
 }
+
+function voltar() {
+  if (atual === 0 || travado) return;
+  atual--;
+  renderPergunta();
+}
+
+// ---------- Resultado ----------
+function calcular() {
+  const total = respostas.reduce((s, v) => s + v, 0);
+  const porCat = {};
+  PERGUNTAS.forEach((p, i) => {
+    porCat[p.cat] ??= { soma: 0, max: 0 };
+    porCat[p.cat].soma += respostas[i];
+    porCat[p.cat].max += 3;
+  });
+  return { pontuacao: Math.round((total / MAX_PONTOS) * 100), porCat };
+}
+
+const nivelDe = (pontos) => NIVEIS.findLast((n) => pontos >= n.min);
+
+async function finalizar() {
+  const { pontuacao, porCat } = calcular();
+  mostrarTela("loading");
+  salvarResultado(nome, pontuacao); // em paralelo com a animação
+
+  for (const frase of FRASES_LOADING) {
+    $("loadingText").textContent = frase;
+    await new Promise((r) => setTimeout(r, reduzMovimento ? 250 : 700));
+  }
+  mostrarResultado(pontuacao, porCat);
+}
+
+function mostrarResultado(pontuacao, porCat) {
+  const nivel = nivelDe(pontuacao);
+  mostrarTela("result");
+
+  $("resultName").textContent = `${nome}, o laudo saiu:`;
+  $("levelEmoji").textContent = nivel.emoji;
+  $("levelTitle").textContent = nivel.titulo;
+  $("levelDesc").textContent = nivel.desc;
+  $("levelQuote").textContent = nivel.frase;
+  $("levelCard").style.setProperty("--accent", nivel.cor);
+
+  const stats = $("stats");
+  stats.innerHTML = "";
+  for (const [cat, { soma, max }] of Object.entries(porCat)) {
+    const pct = Math.round((soma / max) * 100);
+    const row = document.createElement("div");
+    row.className = "stat";
+    row.innerHTML = `<div class="stat-head"><span></span><b>${pct}%</b></div><div class="stat-bar"><i></i></div>`;
+    row.querySelector("span").textContent = CATEGORIAS[cat];
+    stats.appendChild(row);
+    requestAnimationFrame(() => (row.querySelector("i").style.width = `${pct}%`));
+  }
+
+  animarGauge(pontuacao);
+  if (pontuacao >= 73) chuvaDeEmoji(["🎉", "🍻", "👑", "🔥", "🥳"]);
+  else if (pontuacao < 16) chuvaDeEmoji(["💤", "🪫", "😴", "🧊"]);
+
+  $("shareBtn").onclick = () => compartilhar(pontuacao, nivel);
+}
+
+function montarGauge() {
+  // um arco colorido por nível, do 0 ao 100
+  const g = $("gaugeSegments");
+  const ponto = (pct) => {
+    const a = Math.PI * (1 - pct / 100);
+    return `${100 + 80 * Math.cos(a)} ${100 - 80 * Math.sin(a)}`;
+  };
+  NIVEIS.forEach((n, i) => {
+    const fim = NIVEIS[i + 1]?.min ?? 100;
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M${ponto(n.min)} A80 80 0 0 1 ${ponto(fim)}`);
+    path.setAttribute("stroke", n.cor);
+    path.setAttribute("class", "gauge-seg");
+    g.appendChild(path);
+  });
+}
+
+function animarGauge(alvo) {
+  const needle = $("needle");
+  const num = $("scoreNumber");
+  const dur = reduzMovimento ? 0 : 1800;
+  const t0 = performance.now();
+  (function frame(t) {
+    const k = dur ? Math.min((t - t0) / dur, 1) : 1;
+    const ease = 1 - Math.pow(1 - k, 3);
+    // tremidinha no final pra parecer ponteiro de verdade
+    const wobble = k < 1 ? Math.sin(k * 30) * (1 - k) * 6 : 0;
+    const v = alvo * ease;
+    num.textContent = Math.round(v);
+    needle.style.transform = `rotate(${-90 + v * 1.8 + wobble}deg)`;
+    if (k < 1) requestAnimationFrame(frame);
+  })(t0);
+}
+
+function chuvaDeEmoji(emojis) {
+  if (reduzMovimento) return;
+  const box = $("confetti");
+  box.innerHTML = "";
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement("span");
+    s.textContent = emojis[i % emojis.length];
+    s.style.left = `${Math.random() * 100}%`;
+    s.style.animationDelay = `${Math.random() * 1.5}s`;
+    s.style.fontSize = `${18 + Math.random() * 22}px`;
+    box.appendChild(s);
+  }
+  setTimeout(() => (box.innerHTML = ""), 5000);
+}
+
+async function compartilhar(pontuacao, nivel) {
+  const texto =
+    `${nivel.emoji} Medidor de Resenha 2026\n` +
+    `Tirei ${pontuacao}/100 e fui classificado como "${nivel.titulo}".\n` +
+    `Duvido você passar de mim 👉 ${location.origin}`;
+  try {
+    if (navigator.share) await navigator.share({ title: "Medidor de Resenha 2026", text: texto });
+    else {
+      await navigator.clipboard.writeText(texto);
+      toast("Copiado! Agora cola no grupo 😈");
+    }
+  } catch {
+    /* usuário cancelou o compartilhamento */
+  }
+}
+
+// ---------- API / ranking ----------
+async function salvarResultado(nome, pontuacao) {
+  try {
+    const res = await fetch("/api/pontuacao", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, pontuacao }),
+    });
+    if (!res.ok) throw new Error(res.status);
+  } catch {
+    try {
+      const lista = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      lista.push({ nome, pontuacao, data_criacao: new Date().toISOString() });
+      lista.sort((a, b) => b.pontuacao - a.pontuacao);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(lista.slice(0, 10)));
+    } catch {
+      /* sem storage, segue o jogo */
+    }
+  }
+}
+
+async function carregarRanking() {
+  try {
+    const res = await fetch("/api/ranking");
+    if (!res.ok) throw new Error(res.status);
+    return { lista: (await res.json()).data, local: false };
+  } catch {
+    let lista = [];
+    try {
+      lista = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {}
+    return { lista, local: true };
+  }
+}
+
+async function mostrarRanking() {
+  mostrarTela("ranking");
+  const { lista, local } = await carregarRanking();
+
+  const podium = $("podium");
+  const ol = $("rankList");
+  podium.innerHTML = "";
+  ol.innerHTML = "";
+  $("rankEmpty").hidden = lista.length > 0;
+  $("rankSource").textContent = local ? "📴 Servidor offline — mostrando só os resultados deste aparelho." : "";
+
+  const medalhas = ["🥇", "🥈", "🥉"];
+  // ordem visual do pódio: 2º, 1º, 3º
+  [1, 0, 2].forEach((i) => {
+    const j = lista[i];
+    if (!j) return;
+    const el = document.createElement("div");
+    el.className = `podium-spot p${i + 1}`;
+    el.innerHTML = `<div class="podium-medal">${medalhas[i]}</div><div class="podium-name"></div><div class="podium-block">${j.pontuacao}</div>`;
+    el.querySelector(".podium-name").textContent = j.nome;
+    el.title = nivelDe(j.pontuacao).titulo;
+    podium.appendChild(el);
+  });
+
+  lista.slice(3).forEach((j, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="pos">${i + 4}</span><span class="nm"></span><span class="lv"></span><b>${j.pontuacao}</b>`;
+    li.querySelector(".nm").textContent = j.nome;
+    li.querySelector(".lv").textContent = nivelDe(j.pontuacao).emoji;
+    ol.appendChild(li);
+  });
+}
+
+// ---------- Eventos ----------
+let telaAntesDoRanking = "intro";
+
+document.addEventListener("DOMContentLoaded", () => {
+  montarGauge();
+
+  $("startForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    nome = $("nome").value.trim().slice(0, 40);
+    if (!nome) return toast("Sem nome não tem resenha 😤");
+    iniciarQuiz();
+  });
+
+  $("backBtn").addEventListener("click", voltar);
+  $("retryBtn").addEventListener("click", () => mostrarTela("intro"));
+  $("rankBackBtn").addEventListener("click", () => mostrarTela(telaAntesDoRanking));
+
+  document.querySelectorAll("[data-go='ranking']").forEach((b) =>
+    b.addEventListener("click", () => {
+      telaAntesDoRanking = b.closest(".screen").dataset.screen;
+      mostrarRanking();
+    })
+  );
+
+  // Atalhos: A-D ou 1-4 respondem, Backspace volta
+  document.addEventListener("keydown", (e) => {
+    if ($("questionCard").closest(".screen").hidden || e.target.tagName === "INPUT") return;
+    const idx = "ABCD1234".indexOf(e.key.toUpperCase()) % 4;
+    if (idx >= 0 && e.key.length === 1) document.querySelectorAll(".option")[idx]?.click();
+    if (e.key === "Backspace") voltar();
+  });
+
+  // Easter egg: 5 toques no selo 2026 = MODO CAOS
+  let toques = 0;
+  $("yearSticker").addEventListener("click", () => {
+    if (++toques < 5) return;
+    toques = 0;
+    document.body.classList.toggle("caos");
+    toast(document.body.classList.contains("caos") ? "🌀 MODO CAOS ATIVADO" : "Ok, voltamos ao normal 😮‍💨");
+    chuvaDeEmoji(["🌀", "🤪", "💥", "🎪"]);
+  });
+});

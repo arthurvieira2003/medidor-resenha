@@ -6,15 +6,20 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const EDICAO = 2026;
 
-// Configuração do PostgreSQL
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-});
+// Configuração do PostgreSQL (DATABASE_URL tem prioridade, ex.: Neon/Render)
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? { connectionString: process.env.DATABASE_URL }
+    : {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+      }
+);
 
 // Middlewares
 app.use(cors());
@@ -37,10 +42,15 @@ async function initializeDatabase() {
     await pool.query(createTableQuery);
     console.log('✅ Tabela "pontuacoes" verificada/criada com sucesso!');
 
+    // Separa os rankings por ano; registros antigos ficam como edição 2025
+    await pool.query(
+      "ALTER TABLE pontuacoes ADD COLUMN IF NOT EXISTS edicao SMALLINT NOT NULL DEFAULT 2025;"
+    );
+
     // Criar índice para melhor performance nas consultas
     const createIndexQuery = `
-      CREATE INDEX IF NOT EXISTS idx_pontuacoes_pontuacao 
-      ON pontuacoes(pontuacao DESC);
+      CREATE INDEX IF NOT EXISTS idx_pontuacoes_edicao_pontuacao
+      ON pontuacoes(edicao, pontuacao DESC);
     `;
 
     await pool.query(createIndexQuery);
@@ -54,9 +64,10 @@ async function initializeDatabase() {
 // Rota para salvar pontuação
 app.post("/api/pontuacao", async (req, res) => {
   try {
-    const { nome, pontuacao } = req.body;
+    const nome = typeof req.body.nome === "string" ? req.body.nome.trim() : "";
+    const { pontuacao } = req.body;
 
-    if (!nome || pontuacao === undefined) {
+    if (!nome || !Number.isInteger(pontuacao)) {
       return res.status(400).json({
         error: "Nome e pontuação são obrigatórios",
       });
@@ -75,12 +86,12 @@ app.post("/api/pontuacao", async (req, res) => {
     }
 
     const insertQuery = `
-      INSERT INTO pontuacoes (nome, pontuacao) 
-      VALUES ($1, $2) 
+      INSERT INTO pontuacoes (nome, pontuacao, edicao)
+      VALUES ($1, $2, $3)
       RETURNING id, nome, pontuacao, data_criacao;
     `;
 
-    const result = await pool.query(insertQuery, [nome, pontuacao]);
+    const result = await pool.query(insertQuery, [nome, pontuacao, EDICAO]);
 
     res.status(201).json({
       success: true,
@@ -100,12 +111,13 @@ app.get("/api/ranking", async (req, res) => {
   try {
     const rankingQuery = `
       SELECT nome, pontuacao, data_criacao
-      FROM pontuacoes 
-      ORDER BY pontuacao DESC, data_criacao ASC 
+      FROM pontuacoes
+      WHERE edicao = $1
+      ORDER BY pontuacao DESC, data_criacao ASC
       LIMIT 10;
     `;
 
-    const result = await pool.query(rankingQuery);
+    const result = await pool.query(rankingQuery, [EDICAO]);
 
     res.json({
       success: true,
@@ -129,10 +141,11 @@ app.get("/api/estatisticas", async (req, res) => {
         ROUND(AVG(pontuacao), 2) as media_pontuacao,
         MAX(pontuacao) as maior_pontuacao,
         MIN(pontuacao) as menor_pontuacao
-      FROM pontuacoes;
+      FROM pontuacoes
+      WHERE edicao = $1;
     `;
 
-    const result = await pool.query(statsQuery);
+    const result = await pool.query(statsQuery, [EDICAO]);
 
     res.json({
       success: true,
