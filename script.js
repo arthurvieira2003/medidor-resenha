@@ -385,6 +385,7 @@ function responder(btn, pontos, reacao) {
   r.classList.remove("show");
   void r.offsetWidth;
   r.classList.add("show");
+  if (modoFlavio) passarNaTela("🏍️💨", "VRÁÁÁUM, VRUUUM");
 
   setTimeout(() => {
     atual++;
@@ -588,16 +589,70 @@ async function mostrarRanking() {
   });
 }
 
+// ---------- Easter eggs ----------
+const normalizar = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const ehLucas = (n) => /\blucas\b/.test(n) && !n.includes("caetano"); // o Caetano também é Lucas
+let modoFlavio = false;
+let digitado = "";
+const ultimoDisparo = {};
+
+function easterEgg(id, fn) {
+  // teclado e campo de nome podem disparar o mesmo egg juntos
+  if (Date.now() - (ultimoDisparo[id] || 0) < 4000) return;
+  ultimoDisparo[id] = Date.now();
+  fn();
+}
+
+function checarCodigos(texto) {
+  const t = normalizar(texto).replace(/\s/g, "");
+  if (t.endsWith("nissansentra"))
+    easterEgg("sentra", () => {
+      passarNaTela("🚗💨", "NISSAN SENTRA");
+      toast("\"NÃO!\" 🚫 — Petini");
+    });
+  if (t.endsWith("delete") || t.endsWith("droptable")) easterEgg("delete", apagarTudo);
+}
+
+function passarNaTela(emoji, texto) {
+  if (reduzMovimento) return toast(`${emoji} ${texto}`);
+  const el = document.createElement("div");
+  el.className = "flyby";
+  el.textContent = `${emoji} ${texto}`;
+  el.addEventListener("animationend", () => el.remove());
+  document.body.appendChild(el);
+}
+
+function apagarTudo() {
+  const el = document.createElement("div");
+  el.className = "blackout";
+  el.innerHTML = "<pre>&gt; DELETE FROM resenha;\n\n✔ 2026 linhas afetadas.\n\nVitinho, de novo não 😩</pre>";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2200);
+}
+
 // ---------- Eventos ----------
 let telaAntesDoRanking = "intro";
 
 document.addEventListener("DOMContentLoaded", () => {
   montarGauge();
 
+  const startBtn = $("startForm").querySelector("[type=submit]");
+  $("nome").addEventListener("input", (e) => {
+    startBtn.textContent = normalizar(e.target.value).includes("nicolas") ? "JÁ SEI 🤓" : "BORA MEDIR 🔥";
+    checarCodigos(e.target.value); // no celular o keydown não traz a letra
+  });
+
   $("startForm").addEventListener("submit", (e) => {
     e.preventDefault();
     nome = $("nome").value.trim().slice(0, 40);
     if (!nome) return toast("Sem nome não tem resenha 😤");
+    modoFlavio = normalizar(nome).includes("flavio");
+    if (ehLucas(normalizar(nome))) return $("pixDialog").showModal();
+    iniciarQuiz();
+  });
+
+  $("pixDialog").addEventListener("close", (e) => {
+    toast(e.target.returnValue === "pagar" ? "Brincadeira. Mas você hesitou, né? 👀" : "Liberado de graça, muquirana 🪙");
     iniciarQuiz();
   });
 
@@ -614,6 +669,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Atalhos: A-D ou 1-4 respondem, Backspace volta
   document.addEventListener("keydown", (e) => {
+    if (e.key.length === 1) checarCodigos((digitado = (digitado + e.key).slice(-20)));
     if ($("questionCard").closest(".screen").hidden || e.target.tagName === "INPUT") return;
     const idx = "ABCD1234".indexOf(e.key.toUpperCase()) % 4;
     if (idx >= 0 && e.key.length === 1) document.querySelectorAll(".option")[idx]?.click();
